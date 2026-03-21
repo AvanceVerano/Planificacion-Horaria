@@ -1,0 +1,26 @@
+[
+    {
+        "seccion": "SA11",
+        "sede": "Villa",
+        "sesiones": [
+            {
+                "dia": "Mie",
+                "inicio": "5:20pm",
+                "fin": "8:20pm"
+            }
+        ],
+        "profesor": "Jon Doe"
+    },
+    {
+        "seccion": "SA12",
+        "sede": "Virtual",
+        "sesiones": [
+            {
+                "dia": "Jue",
+                "inicio": "2:00pm",
+                "fin": "5:00pm"
+            }
+        ],
+        "profesor": "Jon Doe"
+    }
+]

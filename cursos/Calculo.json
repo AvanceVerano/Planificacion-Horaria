@@ -1,0 +1,20 @@
+[
+    {
+        "seccion": "CA01",
+        "sede": "Villa",
+        "profesor": "Dr. Alan Turing",
+        "sesiones": [
+            { "dia": "Lun", "inicio": "10:00am", "fin": "12:00pm" }, 
+            { "dia": "Mie", "inicio": "10:00am", "fin": "12:00pm" }
+        ]
+    },
+    {
+        "seccion": "CA02",
+        "sede": "Virtual",
+        "profesor": "Lic. Ada Lovelace",
+        "sesiones": [
+            { "dia": "Mar", "inicio": "2:00pm", "fin": "4:00pm" },
+            { "dia": "Jue", "inicio": "2:00pm", "fin": "4:00pm" }
+        ]
+    }
+]

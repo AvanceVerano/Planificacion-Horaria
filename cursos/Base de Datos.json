@@ -1,0 +1,36 @@
+[
+    {
+        "seccion": "BD11",
+        "sede": "Villa",
+        "sesiones": [
+            {
+                "dia": "Mar",
+                "inicio": "2:00pm",
+                "fin": "4:00pm"
+            },
+            {
+                "dia": "Jue",
+                "inicio": "2:00pm",
+                "fin": "4:00pm"
+            }
+        ],
+        "profesor": "Jon Doe"
+    },
+    {
+        "seccion": "BD12",
+        "sede": "Virtual",
+        "sesiones": [
+            {
+                "dia": "Vie",
+                "inicio": "8:00am",
+                "fin": "11:00am"
+            },
+            {
+                "dia": "Sab",
+                "inicio": "8:00am",
+                "fin": "10:00am"
+            }
+        ],
+        "profesor": "Jon Doe"
+    }
+]

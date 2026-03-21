@@ -1,0 +1,20 @@
+[
+    {
+        "seccion": "FI01",
+        "sede": "Villa",
+        "profesor": "Dr. Albert Einstein",
+        "sesiones": [
+            { "dia": "Lun", "inicio": "10:00am", "fin": "12:00pm" }, 
+            { "dia": "Vie", "inicio": "8:00am", "fin": "10:00am" }
+        ]
+    },
+    {
+        "seccion": "FI02",
+        "sede": "Villa",
+        "profesor": "Dra. Marie Curie",
+        "sesiones": [
+            { "dia": "Lun", "inicio": "4:00pm", "fin": "6:00pm" },
+            { "dia": "Mie", "inicio": "4:00pm", "fin": "6:00pm" }
+        ]
+    }
+]
