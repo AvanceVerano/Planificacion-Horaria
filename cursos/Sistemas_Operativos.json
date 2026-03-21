@@ -3,7 +3,11 @@
     "seccion": "10011",
     "sede": "Virtual",
     "sesiones": [
-      { "dia": "Vie", "inicio": "3:00pm", "fin": "6:59pm" }
+      {
+        "dia": "Vie",
+        "inicio": "3:00pm",
+        "fin": "6:59pm"
+      }
     ],
     "profesor": "Bautista Flores, Yackeline"
   },
@@ -11,7 +15,11 @@
     "seccion": "11528",
     "sede": "Monterrico",
     "sesiones": [
-      { "dia": "Jue", "inicio": "7:00pm", "fin": "10:59pm" }
+      {
+        "dia": "Jue",
+        "inicio": "7:00pm",
+        "fin": "10:59pm"
+      }
     ],
     "profesor": "Perez Rojas, Johann Cris."
   },
@@ -19,7 +27,11 @@
     "seccion": "11539",
     "sede": "Monterrico",
     "sesiones": [
-      { "dia": "Mar", "inicio": "7:00pm", "fin": "10:59pm" }
+      {
+        "dia": "Mar",
+        "inicio": "7:00pm",
+        "fin": "10:59pm"
+      }
     ],
     "profesor": "Jara Garcia, Carlos Albert."
   },
@@ -27,8 +39,16 @@
     "seccion": "11544",
     "sede": "San Miguel",
     "sesiones": [
-      { "dia": "Lun", "inicio": "7:00pm", "fin": "8:59pm" },
-      { "dia": "Sáb", "inicio": "7:00pm", "fin": "8:59pm" }
+      {
+        "dia": "Lun",
+        "inicio": "7:00pm",
+        "fin": "8:59pm"
+      },
+      {
+        "dia": "Sab",
+        "inicio": "7:00pm",
+        "fin": "8:59pm"
+      }
     ],
     "profesor": "Bautista Flores, Yackeline"
   },
@@ -36,7 +56,11 @@
     "seccion": "11567",
     "sede": "Virtual",
     "sesiones": [
-      { "dia": "Sáb", "inicio": "7:00am", "fin": "10:59am" }
+      {
+        "dia": "Sab",
+        "inicio": "7:00am",
+        "fin": "10:59am"
+      }
     ],
     "profesor": "Bautista Flores, Yackeline"
   },
@@ -44,7 +68,11 @@
     "seccion": "11576",
     "sede": "San Isidro",
     "sesiones": [
-      { "dia": "Vie", "inicio": "7:00pm", "fin": "10:59pm" }
+      {
+        "dia": "Vie",
+        "inicio": "7:00pm",
+        "fin": "10:59pm"
+      }
     ],
     "profesor": "Jara Garcia, Carlos Albert."
   }
