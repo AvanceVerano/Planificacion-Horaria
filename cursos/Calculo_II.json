@@ -21,12 +21,12 @@
     "sede": "Monterrico",
     "sesiones": [
       {
-        "dia": "Mié",
+        "dia": "Mie",
         "inicio": "9:00am",
         "fin": "10:59am"
       },
       {
-        "dia": "Sáb",
+        "dia": "Sab",
         "inicio": "9:00am",
         "fin": "10:59am"
       }
@@ -38,12 +38,12 @@
     "sede": "Virtual",
     "sesiones": [
       {
-        "dia": "Mié",
+        "dia": "Mie",
         "inicio": "11:00am",
         "fin": "12:59pm"
       },
       {
-        "dia": "Sáb",
+        "dia": "Sab",
         "inicio": "11:00am",
         "fin": "12:59pm"
       }
@@ -55,12 +55,12 @@
     "sede": "Monterrico",
     "sesiones": [
       {
-        "dia": "Mié",
+        "dia": "Mie",
         "inicio": "7:00am",
         "fin": "8:59am"
       },
       {
-        "dia": "Sáb",
+        "dia": "Sab",
         "inicio": "7:00am",
         "fin": "8:59am"
       }
@@ -111,7 +111,7 @@
         "fin": "8:59am"
       },
       {
-        "dia": "Sáb",
+        "dia": "Sab",
         "inicio": "7:00am",
         "fin": "8:59am"
       }
@@ -133,7 +133,7 @@
         "fin": "4:59pm"
       }
     ],
-    "profesor": "Accostupa Huamán, Juan"
+    "profesor": "Accostupa Huaman, Juan"
   },
   {
     "seccion": "4113",
@@ -150,7 +150,7 @@
         "fin": "2:59pm"
       }
     ],
-    "profesor": "Accostupa Huamán, Juan"
+    "profesor": "Accostupa Huaman, Juan"
   },
   {
     "seccion": "4116",
@@ -162,62 +162,62 @@
         "fin": "12:59pm"
       },
       {
-        "dia": "Mié",
+        "dia": "Mie",
         "inicio": "1:00pm",
         "fin": "2:59pm"
       }
     ],
     "profesor": "Novoa Allagual, Armando Alfredo"
   },
-{
-  "seccion": "4280",
-  "sede": "Villa",
-  "sesiones": [
-    {
-      "dia": "Lun",
-      "inicio": "1:00pm",
-      "fin": "2:59pm"
-    },
-    {
-      "dia": "Mié",
-      "inicio": "1:00pm",
-      "fin": "2:59pm"
-    }
-  ],
-  "profesor": "Rojas Villanueva, Joel Hernan"
-},
-{
-  "seccion": "4287",
-  "sede": "Villa",
-  "sesiones": [
-    {
-      "dia": "Lun",
-      "inicio": "9:00am",
-      "fin": "10:59am"
-    },
-    {
-      "dia": "Vie",
-      "inicio": "9:00am",
-      "fin": "10:59am"
-    }
-  ],
-  "profesor": "Rojas Villanueva, Joel Hernan"
-},
-{
-  "seccion": "16447",
-  "sede": "Virtual",
-  "sesiones": [
-    {
-      "dia": "Mar",
-      "inicio": "11:00am",
-      "fin": "12:59pm"
-    },
-    {
-      "dia": "Vie",
-      "inicio": "11:00am",
-      "fin": "12:59pm"
-    }
-  ],
-  "profesor": "Principe Jimenez, Luis Ronald"
-}
+  {
+    "seccion": "4280",
+    "sede": "Villa",
+    "sesiones": [
+      {
+        "dia": "Lun",
+        "inicio": "1:00pm",
+        "fin": "2:59pm"
+      },
+      {
+        "dia": "Mie",
+        "inicio": "1:00pm",
+        "fin": "2:59pm"
+      }
+    ],
+    "profesor": "Rojas Villanueva, Joel Hernan"
+  },
+  {
+    "seccion": "4287",
+    "sede": "Villa",
+    "sesiones": [
+      {
+        "dia": "Lun",
+        "inicio": "9:00am",
+        "fin": "10:59am"
+      },
+      {
+        "dia": "Vie",
+        "inicio": "9:00am",
+        "fin": "10:59am"
+      }
+    ],
+    "profesor": "Rojas Villanueva, Joel Hernan"
+  },
+  {
+    "seccion": "16447",
+    "sede": "Virtual",
+    "sesiones": [
+      {
+        "dia": "Mar",
+        "inicio": "11:00am",
+        "fin": "12:59pm"
+      },
+      {
+        "dia": "Vie",
+        "inicio": "11:00am",
+        "fin": "12:59pm"
+      }
+    ],
+    "profesor": "Principe Jimenez, Luis Ronald"
+  }
 ]
