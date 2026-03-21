@@ -16,6 +16,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-await JsonSeedData.SeedAsync(app.Services);
+if (app.Configuration.GetValue("SeedData:Enabled", true))
+{
+    await JsonSeedData.SeedAsync(app.Services);
+}
 
 app.Run();

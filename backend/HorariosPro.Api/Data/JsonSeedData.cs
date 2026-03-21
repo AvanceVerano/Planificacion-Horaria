@@ -103,7 +103,7 @@ public static class JsonSeedData
         }
 
         var limpio = valor.Trim();
-        var formatos = new[] { "h:mmtt", "hh:mmtt" };
+        var formatos = new[] { "h:mmtt", "hh:mmtt", "h:mm tt", "hh:mm tt" };
 
         if (DateTime.TryParseExact(limpio, formatos, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out var fecha))
         {
