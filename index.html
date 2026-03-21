@@ -22,7 +22,10 @@
             <h1>Horario Individual</h1>
             
             <div class="step">
-                <h3>1. Sube tus archivos JSON de cursos</h3>
+                <h3>1. Carga el catálogo del servidor o sube tus archivos JSON de cursos</h3>
+                <div style="display:flex; justify-content:center; margin-bottom: 10px;">
+                    <button class="btn-secondary" type="button" onclick="cargarCatalogoDesdeApi()">🔄 Cargar catálogo del servidor</button>
+                </div>
                 <div class="drop-zone" id="drop-zone-ind">
                     <svg class="drop-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -38,14 +41,14 @@
             <div class="step">
                 <h3>2. Selecciona las sedes permitidas</h3>
                 <div id="sedes-container" class="checkbox-grid">
-                    <em style="color:#999;">Sube archivos para ver las sedes.</em>
+                    <em style="color:#999;">Carga el catálogo para ver las sedes.</em>
                 </div>
             </div>
 
             <div class="step">
                 <h3>3. Selecciona tus cursos (Máximo 7)</h3>
                 <div id="cursos-container" class="checkbox-grid">
-                    <em style="color:#999;">Sube archivos para ver los cursos.</em>
+                    <em style="color:#999;">Carga el catálogo para ver los cursos.</em>
                 </div>
             </div>
 
@@ -64,6 +67,13 @@
                 <label style="font-weight: bold; font-size: 16px; color: #2c3e50;">¿Cuántos alumnos son?</label>
                 <input type="number" id="num-students" min="2" max="5" value="2" class="modern-input-num">
                 <button class="btn-secondary" onclick="generarTarjetasAlumnos()" style="margin: 0; padding: 8px 20px;">Actualizar Tarjetas</button>
+            </div>
+            <div class="step" style="display: flex; gap: 15px; align-items: center; justify-content: center; background: #fff; border: 1px solid #e1e8ed; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+                <label style="font-weight: bold; font-size: 16px; color: #2c3e50;">Fuente de cursos:</label>
+                <label class="checkbox-item" style="margin: 0;">
+                    <input type="checkbox" id="group-use-json" onchange="toggleModoGrupoJson(this.checked)"> Usar JSON propios
+                </label>
+                <span style="font-size: 12px; color: #7f8c8d;">Si faltan cursos en la base, puedes subir JSON.</span>
             </div>
 
             <div id="students-container">
@@ -150,6 +160,19 @@
                     <input type="file" id="edit-file-input" accept=".json" style="display: none;" onchange="cargarJsonParaEditar(event)">
                 </div>
             </div>
+            <div class="builder-crud">
+                <div class="input-group">
+                    <label>Curso en el servidor:</label>
+                    <select id="builder-course-select"></select>
+                </div>
+                <div class="builder-actions">
+                    <button class="btn-secondary" type="button" onclick="cargarCursosServidor()">🔄 Actualizar lista</button>
+                    <button class="btn-secondary" type="button" onclick="cargarCursoServidorSeleccionado()">⬇️ Cargar del servidor</button>
+                    <button class="btn-main" type="button" onclick="guardarCursoServidor()">💾 Guardar en servidor</button>
+                    <button class="btn-delete" type="button" onclick="eliminarCursoServidor()">🗑️ Eliminar</button>
+                </div>
+            </div>
+            <div id="builder-status" class="file-list-preview"></div>
 
             <div id="sections-container"></div>
 

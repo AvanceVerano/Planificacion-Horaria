@@ -43,10 +43,5 @@ El sistema espera que cada curso sea un archivo separado (ej. `Estructura de Dat
 ]
 \`\`\`
 
-## 👨‍💻 Autor
-
-**Fabrizio Santi**
-Estudiante de Ingeniería de Software.
-
 ---
 *Si encuentras útil esta herramienta, ¡no dudes en darle una ⭐ al repositorio!*
