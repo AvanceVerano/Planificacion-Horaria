@@ -16,7 +16,7 @@
     "sede": "Monterrico",
     "sesiones": [
       {
-        "dia": "Mié",
+        "dia": "Mie",
         "inicio": "5:00pm",
         "fin": "7:59pm"
       }
@@ -28,7 +28,7 @@
     "sede": "Monterrico",
     "sesiones": [
       {
-        "dia": "Mié",
+        "dia": "Mie",
         "inicio": "1:00pm",
         "fin": "3:59pm"
       }
@@ -40,7 +40,7 @@
     "sede": "Monterrico",
     "sesiones": [
       {
-        "dia": "Mié",
+        "dia": "Mie",
         "inicio": "8:00pm",
         "fin": "10:59pm"
       }
@@ -52,7 +52,7 @@
     "sede": "Monterrico",
     "sesiones": [
       {
-        "dia": "Mié",
+        "dia": "Mie",
         "inicio": "7:00am",
         "fin": "9:59am"
       }
@@ -64,7 +64,7 @@
     "sede": "Monterrico",
     "sesiones": [
       {
-        "dia": "Mié",
+        "dia": "Mie",
         "inicio": "11:00am",
         "fin": "1:59pm"
       }
@@ -88,24 +88,24 @@
     "sede": "Monterrico",
     "sesiones": [
       {
-        "dia": "Mié",
+        "dia": "Mie",
         "inicio": "1:00pm",
         "fin": "3:59pm"
       }
     ],
-    "profesor": "Acosta Ramírez, Salomón Ciro"
+    "profesor": "Acosta Ramirez, Salomon Ciro"
   },
   {
     "seccion": "6178",
     "sede": "Monterrico",
     "sesiones": [
       {
-        "dia": "Mié",
+        "dia": "Mie",
         "inicio": "4:00pm",
         "fin": "6:59pm"
       }
     ],
-    "profesor": "Pinillos Grijalba, Teresa Lucía"
+    "profesor": "Pinillos Grijalba, Teresa Lucia"
   },
   {
     "seccion": "6190",
@@ -117,14 +117,14 @@
         "fin": "12:59pm"
       }
     ],
-    "profesor": "Acosta Ramírez, Salomón Ciro"
+    "profesor": "Acosta Ramirez, Salomon Ciro"
   },
   {
     "seccion": "6221",
     "sede": "San Isidro",
     "sesiones": [
       {
-        "dia": "Mié",
+        "dia": "Mie",
         "inicio": "4:00pm",
         "fin": "6:59pm"
       }
@@ -136,7 +136,7 @@
     "sede": "San Isidro",
     "sesiones": [
       {
-        "dia": "Sáb",
+        "dia": "Sab",
         "inicio": "7:00am",
         "fin": "9:59am"
       }
@@ -184,7 +184,7 @@
     "sede": "San Miguel",
     "sesiones": [
       {
-        "dia": "Mié",
+        "dia": "Mie",
         "inicio": "4:00pm",
         "fin": "6:59pm"
       }
@@ -220,7 +220,7 @@
     "sede": "San Miguel",
     "sesiones": [
       {
-        "dia": "Mié",
+        "dia": "Mie",
         "inicio": "10:00am",
         "fin": "12:59pm"
       }
@@ -237,7 +237,7 @@
         "fin": "9:59am"
       }
     ],
-    "profesor": "Pinillos Grijalba, Teresa Lucía"
+    "profesor": "Pinillos Grijalba, Teresa Lucia"
   },
   {
     "seccion": "6259",
@@ -280,7 +280,7 @@
     "sede": "Villa",
     "sesiones": [
       {
-        "dia": "Sáb",
+        "dia": "Sab",
         "inicio": "7:00am",
         "fin": "9:59am"
       }
