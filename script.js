@@ -69,6 +69,15 @@ function obtenerColorCurso(nombre) {
     return coloresPorCurso[nombre];
 }
 
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 // --- CATALOGO API ---
 async function cargarCatalogoDesdeApi() {
     const estado = document.getElementById('file-list-preview-ind');
@@ -145,7 +154,7 @@ function renderCatalogoIndividual() {
         sedesCont.innerHTML = '<em style="color:#999;">No hay sedes disponibles.</em>';
     } else {
         Array.from(sedesInd).sort().forEach(s =>
-            sedesCont.innerHTML += `<label class="checkbox-item"><input type="checkbox" class="chk-sede" value="${s}" checked> ${s}</label>`
+            sedesCont.innerHTML += `<label class="checkbox-item"><input type="checkbox" class="chk-sede" value="${escapeHtml(s)}" checked> ${escapeHtml(s)}</label>`
         );
     }
 
@@ -155,7 +164,7 @@ function renderCatalogoIndividual() {
         cursosCont.innerHTML = '<em style="color:#999;">No hay cursos disponibles.</em>';
     } else {
         Object.keys(cursosDataInd).sort().forEach(c =>
-            cursosCont.innerHTML += `<label class="checkbox-item"><input type="checkbox" class="chk-curso" value="${c}" checked> ${c}</label>`
+            cursosCont.innerHTML += `<label class="checkbox-item"><input type="checkbox" class="chk-curso" value="${escapeHtml(c)}" checked> ${escapeHtml(c)}</label>`
         );
     }
 
@@ -335,7 +344,8 @@ function generarTarjetasAlumnos() {
                 : `<div style="flex:2;">` +
                   `<div class="checkbox-grid">` + catalogoCursos.map(curso => {
                     const safeCurso = JSON.stringify(curso);
-                    return `<label class="checkbox-item"><input type="checkbox" value="${curso}" onchange="toggleCursoAlumno(${i}, ${safeCurso}, this.checked)"> ${curso}</label>`;
+                    const safeLabel = escapeHtml(curso);
+                    return `<label class="checkbox-item"><input type="checkbox" value="${safeLabel}" onchange="toggleCursoAlumno(${i}, ${safeCurso}, this.checked)"> ${safeLabel}</label>`;
                 }).join('') + `</div></div>`)
             : `
                 <div class="student-drop" 
@@ -444,7 +454,7 @@ function actualizarFiltrosGrupales() {
         Array.from(sedesGrpGlobales).sort().forEach(sede => {
             container.innerHTML += `
                 <label class="checkbox-item">
-                    <input type="checkbox" class="chk-sede-grp" value="${sede}" checked> ${sede}
+                    <input type="checkbox" class="chk-sede-grp" value="${escapeHtml(sede)}" checked> ${escapeHtml(sede)}
                 </label>`;
         });
     }
