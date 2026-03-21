@@ -8,6 +8,7 @@ let catalogoDisponible = false;
 let catalogoCursos = [];
 let origenDatosInd = 'ninguno';
 let origenDatosGrp = 'ninguno';
+const API_BASE_URL = 'http://localhost:5067';
 
 // Estado del Calendario Actual
 let schedulesList = [];
@@ -92,7 +93,7 @@ async function cargarCatalogoDesdeApi() {
     estado.innerText = 'Cargando catálogo del servidor...';
 
     try {
-        const response = await fetch('/api/cursos');
+        const response = await fetch(`${API_BASE_URL}/api/cursos`);
         if (!response.ok) {
             const mensaje = await response.text();
             throw new Error(mensaje || 'No se pudo cargar el catálogo.');
@@ -260,7 +261,7 @@ async function iniciarGeneracionInd() {
 
 async function solicitarHorariosIndividualApi(cursosReq, sedesReq) {
     try {
-        const response = await fetch('/api/horarios/individual', {
+        const response = await fetch(`${API_BASE_URL}/api/horarios/individual`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ cursos: cursosReq, sedes: sedesReq })
@@ -288,7 +289,7 @@ async function solicitarHorariosIndividualApi(cursosReq, sedesReq) {
 
 async function solicitarHorariosGrupalesApi(estudiantes, sedesPermitidas) {
     try {
-        const response = await fetch('/api/horarios/grupal', {
+        const response = await fetch(`${API_BASE_URL}/api/horarios/grupal`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ estudiantes, sedes: sedesPermitidas })
@@ -770,7 +771,7 @@ function actualizarSelectorCursosServidor() {
 async function cargarCursosServidor() {
     setBuilderStatus('Cargando cursos del servidor...');
     try {
-        const response = await fetch('/api/admin/cursos');
+        const response = await fetch(`${API_BASE_URL}/api/admin/cursos`);
         if (!response.ok) {
             const mensaje = await response.text();
             throw new Error(mensaje || 'No se pudo cargar el catálogo admin.');
@@ -824,7 +825,7 @@ function cargarCursoServidorSeleccionado() {
 }
 
 async function eliminarSeccionesCursoServidor(cursoId) {
-    const response = await fetch(`/api/admin/secciones?cursoId=${encodeURIComponent(cursoId)}`);
+    const response = await fetch(`${API_BASE_URL}/api/admin/secciones?cursoId=${encodeURIComponent(cursoId)}`);
     if (!response.ok) {
         const mensaje = await response.text();
         throw new Error(mensaje || 'No se pudieron cargar las secciones.');
@@ -832,7 +833,7 @@ async function eliminarSeccionesCursoServidor(cursoId) {
     const secciones = await response.json();
     if (!Array.isArray(secciones)) return;
     for (const seccion of secciones) {
-        const deleteResponse = await fetch(`/api/admin/secciones/${seccion.id}`, { method: 'DELETE' });
+        const deleteResponse = await fetch(`${API_BASE_URL}/api/admin/secciones/${seccion.id}`, { method: 'DELETE' });
         if (!deleteResponse.ok) {
             const mensaje = await deleteResponse.text();
             throw new Error(mensaje || 'No se pudo eliminar una sección.');
@@ -873,7 +874,7 @@ async function guardarCursoServidor() {
     try {
         let cursoId = builderCursoActualId;
         if (!cursoId) {
-            const response = await fetch('/api/admin/cursos', {
+            const response = await fetch(`${API_BASE_URL}/api/admin/cursos`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ nombre: nombreCurso })
@@ -885,7 +886,7 @@ async function guardarCursoServidor() {
             const created = await response.json();
             cursoId = created.id;
         } else {
-            const response = await fetch(`/api/admin/cursos/${cursoId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/admin/cursos/${cursoId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ nombre: nombreCurso })
@@ -898,7 +899,7 @@ async function guardarCursoServidor() {
         }
 
         for (const sec of editorData) {
-            const response = await fetch('/api/admin/secciones', {
+            const response = await fetch(`${API_BASE_URL}/api/admin/secciones`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -916,7 +917,7 @@ async function guardarCursoServidor() {
             const seccionId = seccionCreada.id;
 
             for (const sesion of sec.sesiones) {
-                const sesionResponse = await fetch('/api/admin/sesiones', {
+                const sesionResponse = await fetch(`${API_BASE_URL}/api/admin/sesiones`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -952,7 +953,7 @@ async function eliminarCursoServidor() {
 
     setBuilderStatus('Eliminando curso del servidor...');
     try {
-        const response = await fetch(`/api/admin/cursos/${cursoId}`, { method: 'DELETE' });
+        const response = await fetch(`${API_BASE_URL}/api/admin/cursos/${cursoId}`, { method: 'DELETE' });
         if (!response.ok) {
             const mensaje = await response.text();
             throw new Error(mensaje || 'No se pudo eliminar el curso.');
