@@ -4,6 +4,10 @@ const totalMinutes = (endHour - startHour) * 60;
 const paletaColores = ['#4A90E2', '#E74C3C', '#50E3C2', '#F5A623', '#9B59B6', '#34495E', '#16A085', '#D35400'];
 let colorIndex = 0;
 let coloresPorCurso = {};
+let catalogoDisponible = false;
+let catalogoCursos = [];
+let origenDatosInd = 'ninguno';
+let origenDatosGrp = 'ninguno';
 
 // Estado del Calendario Actual
 let schedulesList = [];
@@ -65,10 +69,104 @@ function obtenerColorCurso(nombre) {
     return coloresPorCurso[nombre];
 }
 
+// --- CATALOGO API ---
+async function cargarCatalogoDesdeApi() {
+    const estado = document.getElementById('file-list-preview-ind');
+    estado.style.color = '#27ae60';
+    estado.innerText = 'Cargando catálogo del servidor...';
+
+    try {
+        const response = await fetch('/api/cursos');
+        if (!response.ok) {
+            const mensaje = await response.text();
+            throw new Error(mensaje || 'No se pudo cargar el catálogo.');
+        }
+
+        const data = await response.json();
+        if (!Array.isArray(data)) {
+            throw new Error('El catálogo recibido no es válido.');
+        }
+
+        aplicarCatalogo(data);
+        estado.style.color = '#27ae60';
+        estado.innerText = `Catálogo cargado: ${catalogoCursos.length} cursos.`;
+    } catch (error) {
+        console.error(error);
+        catalogoDisponible = false;
+        if (origenDatosInd !== 'archivos') origenDatosInd = 'ninguno';
+        if (origenDatosGrp !== 'archivos') origenDatosGrp = 'ninguno';
+        estado.style.color = '#e74c3c';
+        estado.innerText = 'No se pudo cargar el catálogo del servidor.';
+    }
+}
+
+function aplicarCatalogo(data) {
+    cursosDataInd = {};
+    sedesInd.clear();
+    sedesGrpGlobales.clear();
+    catalogoCursos = [];
+
+    data.forEach(curso => {
+        if (!curso || !curso.nombre) return;
+        const secciones = (curso.secciones || []).map(seccion => ({
+            seccion: seccion.codigo || seccion.seccion || '',
+            sede: seccion.sede || '',
+            profesor: seccion.profesor || '',
+            sesiones: (seccion.sesiones || []).map(sesion => ({
+                dia: sesion.dia,
+                inicio: sesion.horaInicio,
+                fin: sesion.horaFin
+            }))
+        }));
+
+        cursosDataInd[curso.nombre] = secciones;
+        catalogoCursos.push(curso.nombre);
+        secciones.forEach(sec => {
+            if (sec.sede) {
+                sedesInd.add(sec.sede);
+                sedesGrpGlobales.add(sec.sede);
+            }
+        });
+    });
+
+    catalogoCursos.sort((a, b) => a.localeCompare(b));
+    catalogoDisponible = true;
+    origenDatosInd = 'api';
+    origenDatosGrp = 'api';
+
+    renderCatalogoIndividual();
+    actualizarFiltrosGrupales();
+}
+
+function renderCatalogoIndividual() {
+    const sedesCont = document.getElementById('sedes-container');
+    sedesCont.innerHTML = '';
+    if (sedesInd.size === 0) {
+        sedesCont.innerHTML = '<em style="color:#999;">No hay sedes disponibles.</em>';
+    } else {
+        Array.from(sedesInd).sort().forEach(s =>
+            sedesCont.innerHTML += `<label class="checkbox-item"><input type="checkbox" class="chk-sede" value="${s}" checked> ${s}</label>`
+        );
+    }
+
+    const cursosCont = document.getElementById('cursos-container');
+    cursosCont.innerHTML = '';
+    if (Object.keys(cursosDataInd).length === 0) {
+        cursosCont.innerHTML = '<em style="color:#999;">No hay cursos disponibles.</em>';
+    } else {
+        Object.keys(cursosDataInd).sort().forEach(c =>
+            cursosCont.innerHTML += `<label class="checkbox-item"><input type="checkbox" class="chk-curso" value="${c}" checked> ${c}</label>`
+        );
+    }
+
+    document.getElementById('btn-generar').disabled = Object.keys(cursosDataInd).length === 0;
+}
+
 // --- MODO INDIVIDUAL ---
 async function procesarArchivosInd(event) {
     const archivos = event.target.files;
     if (archivos.length === 0) return;
+    origenDatosInd = 'archivos';
     cursosDataInd = {}; sedesInd.clear();
     for (let f of archivos) {
         const nombre = f.name.replace('.json', '');
@@ -76,21 +174,40 @@ async function procesarArchivosInd(event) {
         cursosDataInd[nombre] = json;
         json.forEach(s => sedesInd.add(s.sede));
     }
-    document.getElementById('file-list-preview-ind').innerText = `${archivos.length} archivos cargados.`;
-    
-    // Render Checkboxes
-    const sedesCont = document.getElementById('sedes-container'); sedesCont.innerHTML = '';
-    Array.from(sedesInd).forEach(s => sedesCont.innerHTML += `<label class="checkbox-item"><input type="checkbox" class="chk-sede" value="${s}" checked> ${s}</label>`);
-    const cursosCont = document.getElementById('cursos-container'); cursosCont.innerHTML = '';
-    Object.keys(cursosDataInd).forEach(c => cursosCont.innerHTML += `<label class="checkbox-item"><input type="checkbox" class="chk-curso" value="${c}" checked> ${c}</label>`);
-    
-    document.getElementById('btn-generar').disabled = false;
+    const estado = document.getElementById('file-list-preview-ind');
+    estado.style.color = '#27ae60';
+    estado.innerText = `${archivos.length} archivos cargados.`;
+
+    renderCatalogoIndividual();
 }
 
-function iniciarGeneracionInd() {
+async function iniciarGeneracionInd() {
     const cursosReq = Array.from(document.querySelectorAll('.chk-curso:checked')).map(cb => cb.value);
     const sedesReq = Array.from(document.querySelectorAll('.chk-sede:checked')).map(cb => cb.value);
     horariosInd = [];
+    document.getElementById('error-msg').innerText = '';
+
+    if (cursosReq.length === 0) {
+        document.getElementById('error-msg').innerText = 'Selecciona al menos un curso.';
+        return;
+    }
+
+    if (origenDatosInd === 'api' && catalogoDisponible) {
+        const horariosApi = await solicitarHorariosIndividualApi(cursosReq, sedesReq);
+        if (!horariosApi) return;
+
+        horariosInd = horariosApi;
+        if (horariosInd.length === 0) {
+            document.getElementById('error-msg').innerText = "No se encontró ninguna combinación posible. Intenta quitar cursos que se crucen o selecciona más sedes.";
+            return;
+        }
+
+        isGroupMode = false;
+        schedulesList = horariosInd;
+        prepararCalendario('Individuales', 'screen-setup');
+        cambiarPantalla('screen-calendar');
+        return;
+    }
     
     function choca(horario, nuevaSec) {
         return horario.some(sec => sec.sesiones.some(s1 => nuevaSec.sesiones.some(s2 => hayColision(s1, s2))));
@@ -125,6 +242,77 @@ function iniciarGeneracionInd() {
     cambiarPantalla('screen-calendar');
 }
 
+async function solicitarHorariosIndividualApi(cursosReq, sedesReq) {
+    try {
+        const response = await fetch('/api/horarios/individual', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cursos: cursosReq, sedes: sedesReq })
+        });
+
+        if (!response.ok) {
+            const mensaje = await response.text();
+            document.getElementById('error-msg').innerText = mensaje || 'No se pudo generar horarios.';
+            return null;
+        }
+
+        const data = await response.json();
+        if (!Array.isArray(data)) {
+            document.getElementById('error-msg').innerText = 'La respuesta del servidor es inválida.';
+            return null;
+        }
+
+        return data.map(mapHorarioApiToLocal);
+    } catch (error) {
+        console.error(error);
+        document.getElementById('error-msg').innerText = 'No se pudo conectar con el servidor.';
+        return null;
+    }
+}
+
+async function solicitarHorariosGrupalesApi(estudiantes, sedesPermitidas) {
+    try {
+        const response = await fetch('/api/horarios/grupal', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ estudiantes, sedes: sedesPermitidas })
+        });
+
+        if (!response.ok) {
+            const mensaje = await response.text();
+            document.getElementById('error-msg-group').innerText = mensaje || 'No se pudo generar horarios grupales.';
+            return null;
+        }
+
+        const data = await response.json();
+        if (!Array.isArray(data)) {
+            document.getElementById('error-msg-group').innerText = 'La respuesta del servidor es inválida.';
+            return null;
+        }
+
+        return data.map(mapHorarioApiToLocal);
+    } catch (error) {
+        console.error(error);
+        document.getElementById('error-msg-group').innerText = 'No se pudo conectar con el servidor.';
+        return null;
+    }
+}
+
+function mapHorarioApiToLocal(horarioApi) {
+    if (!horarioApi || !Array.isArray(horarioApi.items)) return [];
+    return horarioApi.items.map(item => ({
+        curso: item.cursoNombre || '',
+        seccion: item.seccion?.codigo || '',
+        sede: item.seccion?.sede || '',
+        profesor: item.seccion?.profesor || '',
+        sesiones: (item.seccion?.sesiones || []).map(sesion => ({
+            dia: sesion.dia,
+            inicio: sesion.horaInicio,
+            fin: sesion.horaFin
+        }))
+    }));
+}
+
 // --- MODO GRUPAL ---
 let sedesGrpGlobales = new Set(); // Guarda las sedes de todos los JSON del grupo
 
@@ -133,18 +321,23 @@ function generarTarjetasAlumnos() {
     const cont = document.getElementById('students-container');
     cont.innerHTML = '';
     groupStudents = [];
-    sedesGrpGlobales.clear(); // Limpiamos sedes previas
+    if (!catalogoDisponible) {
+        sedesGrpGlobales.clear(); // Limpiamos sedes previas si no hay catálogo
+    }
     document.getElementById('group-filters-section').style.display = 'none';
+    const usarCatalogo = catalogoDisponible;
 
     for (let i = 0; i < n; i++) {
         groupStudents.push({ name: `Alumno ${i+1}`, courses: [], data: {} });
-        cont.innerHTML += `
-            <div class="student-card">
-                <div class="student-info">
-                    <label style="font-weight:bold; color: #2c3e50;">Nombre:</label>
-                    <input type="text" value="Alumno ${i+1}" onchange="groupStudents[${i}].name = this.value" style="margin-bottom: 10px;">
-                    <div id="stu-courses-${i}" class="student-courses-list">Cursos: 0 cargados</div>
-                </div>
+        const cursosHtml = usarCatalogo
+            ? (catalogoCursos.length === 0
+                ? '<div style="flex:2; color:#999; font-size:12px;">No hay cursos disponibles.</div>'
+                : `<div style="flex:2;">` +
+                  `<div class="checkbox-grid">` + catalogoCursos.map(curso => {
+                    const safeCurso = JSON.stringify(curso);
+                    return `<label class="checkbox-item"><input type="checkbox" value="${curso}" onchange="toggleCursoAlumno(${i}, ${safeCurso}, this.checked)"> ${curso}</label>`;
+                }).join('') + `</div></div>`)
+            : `
                 <div class="student-drop" 
                      ondragover="allowDropGrp(event)" 
                      ondragleave="leaveDropGrp(event)" 
@@ -155,10 +348,22 @@ function generarTarjetasAlumnos() {
                     <small style="color: #7f8c8d; margin-top: 5px;">Archivos de este alumno</small>
                     
                     <input type="file" id="file-input-grp-${i}" multiple accept=".json" style="display:none;" onchange="readStudentFiles(event, ${i})">
+                </div>`;
+
+        cont.innerHTML += `
+            <div class="student-card">
+                <div class="student-info">
+                    <label style="font-weight:bold; color: #2c3e50;">Nombre:</label>
+                    <input type="text" value="Alumno ${i+1}" onchange="groupStudents[${i}].name = this.value" style="margin-bottom: 10px;">
+                    <div id="stu-courses-${i}" class="student-courses-list">Cursos: 0 seleccionados</div>
                 </div>
+                ${cursosHtml}
             </div>`;
     }
     document.getElementById('btn-generar-grupo').style.display = 'block';
+    if (usarCatalogo) {
+        actualizarFiltrosGrupales();
+    }
 }
 
 // Controladores seguros de Drag & Drop
@@ -179,9 +384,35 @@ function dropStudentFiles(event, index) {
     }
 }
 
+function toggleCursoAlumno(index, curso, seleccionado) {
+    const student = groupStudents[index];
+    if (!student) return;
+
+    if (seleccionado) {
+        if (!student.courses.includes(curso)) {
+            student.courses.push(curso);
+        }
+    } else {
+        student.courses = student.courses.filter(c => c !== curso);
+    }
+
+    actualizarCursosAlumno(index);
+}
+
+function actualizarCursosAlumno(index) {
+    const student = groupStudents[index];
+    const label = document.getElementById(`stu-courses-${index}`);
+    if (!student || !label) return;
+
+    label.innerText = student.courses.length > 0
+        ? `Cursos: ${student.courses.join(', ')}`
+        : 'Cursos: 0 seleccionados';
+}
+
 async function readStudentFiles(event, index) {
     const files = event.target.files || event.dataTransfer.files;
     let student = groupStudents[index];
+    origenDatosGrp = 'archivos';
     student.courses = [];
     student.data = {};
 
@@ -199,7 +430,7 @@ async function readStudentFiles(event, index) {
         }
     }
     
-    document.getElementById(`stu-courses-${index}`).innerText = `Cursos: ${student.courses.join(', ')}`;
+    actualizarCursosAlumno(index);
     actualizarFiltrosGrupales();
 }
 
@@ -219,68 +450,89 @@ function actualizarFiltrosGrupales() {
     }
 }
 
-function iniciarGeneracionGrupal() {
-    let globalCoursesSet = new Set();
-    let globalData = {};
+async function iniciarGeneracionGrupal() {
+    document.getElementById('error-msg-group').innerText = '';
 
     // Obtener filtros seleccionados
     const sedesPermitidas = Array.from(document.querySelectorAll('.chk-sede-grp:checked')).map(cb => cb.value);
-    
+
     if (sedesPermitidas.length === 0) {
-        alert("Debes seleccionar al menos una sede permitida en los filtros grupales.");
+        document.getElementById('error-msg-group').innerText = "Debes seleccionar al menos una sede permitida en los filtros grupales.";
         return;
     }
 
-    // Fusionar todos los cursos requeridos
-    groupStudents.forEach(stu => {
-        stu.courses.forEach(c => {
-            globalCoursesSet.add(c);
-            if (!globalData[c]) globalData[c] = stu.data[c]; 
-        });
-    });
+    const estudiantesSinCursos = groupStudents.filter(stu => !stu.courses || stu.courses.length === 0);
+    if (estudiantesSinCursos.length > 0) {
+        document.getElementById('error-msg-group').innerText = "Todos los alumnos deben tener al menos un curso seleccionado.";
+        return;
+    }
 
-    let globalCourses = Array.from(globalCoursesSet);
+    const usarApi = catalogoDisponible && origenDatosGrp !== 'archivos';
     horariosGrp = [];
 
-    function buscarGrp(idx, actualSchedule) {
-        if (idx === globalCourses.length) { horariosGrp.push([...actualSchedule]); return; }
-        
-        let courseName = globalCourses[idx];
-        let sections = globalData[courseName] || [];
+    if (usarApi) {
+        const payloadEstudiantes = groupStudents.map(stu => ({
+            nombre: stu.name,
+            cursos: stu.courses
+        }));
 
-        for (let sec of sections) {
-            // APLICAMOS EL FILTRO GRUPAL: Si la sede no está permitida, descartar
-            if (!sedesPermitidas.includes(sec.sede)) continue;
+        const horariosApi = await solicitarHorariosGrupalesApi(payloadEstudiantes, sedesPermitidas);
+        if (!horariosApi) return;
+        horariosGrp = horariosApi;
+    } else {
+        let globalCoursesSet = new Set();
+        let globalData = {};
 
-            let isValidForAll = true;
-            
-            for (let stu of groupStudents) {
-                if (stu.courses.includes(courseName)) {
-                    let personalSchedule = actualSchedule.filter(s => stu.courses.includes(s.curso));
-                    let choca = personalSchedule.some(existente => 
-                        existente.sesiones.some(s1 => sec.sesiones.some(s2 => hayColision(s1, s2)))
-                    );
-                    
-                    if (choca) { isValidForAll = false; break; }
+        // Fusionar todos los cursos requeridos
+        groupStudents.forEach(stu => {
+            stu.courses.forEach(c => {
+                globalCoursesSet.add(c);
+                if (!globalData[c]) globalData[c] = stu.data[c];
+            });
+        });
+
+        let globalCourses = Array.from(globalCoursesSet);
+
+        function buscarGrp(idx, actualSchedule) {
+            if (idx === globalCourses.length) { horariosGrp.push([...actualSchedule]); return; }
+
+            let courseName = globalCourses[idx];
+            let sections = globalData[courseName] || [];
+
+            for (let sec of sections) {
+                // APLICAMOS EL FILTRO GRUPAL: Si la sede no está permitida, descartar
+                if (!sedesPermitidas.includes(sec.sede)) continue;
+
+                let isValidForAll = true;
+
+                for (let stu of groupStudents) {
+                    if (stu.courses.includes(courseName)) {
+                        let personalSchedule = actualSchedule.filter(s => stu.courses.includes(s.curso));
+                        let choca = personalSchedule.some(existente =>
+                            existente.sesiones.some(s1 => sec.sesiones.some(s2 => hayColision(s1, s2)))
+                        );
+
+                        if (choca) { isValidForAll = false; break; }
+                    }
+                }
+
+                if (isValidForAll) {
+                    actualSchedule.push({ ...sec, curso: courseName });
+                    buscarGrp(idx + 1, actualSchedule);
+                    actualSchedule.pop();
                 }
             }
-
-            if (isValidForAll) {
-                actualSchedule.push({...sec, curso: courseName});
-                buscarGrp(idx + 1, actualSchedule);
-                actualSchedule.pop();
-            }
         }
+
+        buscarGrp(0, []);
     }
-    
-    buscarGrp(0, []);
 
     // --- NUEVA VALIDACIÓN DE RESULTADOS VACÍOS ---
     if (horariosGrp.length === 0) {
         document.getElementById('error-msg-group').innerText = "No se encontró ninguna combinación grupal sin cruces. Intenten flexibilizar las sedes o quitar algún curso conflictivo.";
         return; // Detiene el código, no cambia de pantalla
     }
-    
+
     horariosGrp.forEach(schedule => {
         schedule.forEach(sec => {
             sec.alumnos = groupStudents.filter(stu => stu.courses.includes(sec.curso)).map(stu => stu.name);
@@ -599,3 +851,7 @@ function descargarJSON() {
     
     URL.revokeObjectURL(url);
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    cargarCatalogoDesdeApi();
+});

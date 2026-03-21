@@ -22,7 +22,10 @@
             <h1>Horario Individual</h1>
             
             <div class="step">
-                <h3>1. Sube tus archivos JSON de cursos</h3>
+                <h3>1. Carga el catálogo del servidor o sube tus archivos JSON de cursos</h3>
+                <div style="display:flex; justify-content:center; margin-bottom: 10px;">
+                    <button class="btn-secondary" type="button" onclick="cargarCatalogoDesdeApi()">🔄 Cargar catálogo del servidor</button>
+                </div>
                 <div class="drop-zone" id="drop-zone-ind">
                     <svg class="drop-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -38,14 +41,14 @@
             <div class="step">
                 <h3>2. Selecciona las sedes permitidas</h3>
                 <div id="sedes-container" class="checkbox-grid">
-                    <em style="color:#999;">Sube archivos para ver las sedes.</em>
+                    <em style="color:#999;">Carga el catálogo para ver las sedes.</em>
                 </div>
             </div>
 
             <div class="step">
                 <h3>3. Selecciona tus cursos (Máximo 7)</h3>
                 <div id="cursos-container" class="checkbox-grid">
-                    <em style="color:#999;">Sube archivos para ver los cursos.</em>
+                    <em style="color:#999;">Carga el catálogo para ver los cursos.</em>
                 </div>
             </div>
 
