@@ -279,6 +279,28 @@ input[type="text"]:focus {
     flex-shrink: 0;
 }
 
+.builder-crud {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.builder-crud select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #dfe6e9;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.builder-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
 .section-card {
     background: white;
     border: 1px solid #e1e8ed;

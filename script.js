@@ -26,6 +26,13 @@ let favsInd = [];
 let groupStudents = []; // { name: "Juan", courses: ["Web"], data: {"Web": [...]} }
 let horariosGrp = [];
 let favsGrp = [];
+let modoCargaGrupo = 'catalogo';
+
+// Editor de cursos
+let editorData = [];
+let currentTargetSectionIndex = 0;
+let builderCursosServidor = [];
+let builderCursoActualId = null;
 
 // --- NAVEGACIÓN ---
 function switchTab(tab) {
@@ -325,16 +332,23 @@ function mapHorarioApiToLocal(horarioApi) {
 // --- MODO GRUPAL ---
 let sedesGrpGlobales = new Set(); // Guarda las sedes de todos los JSON del grupo
 
+function toggleModoGrupoJson(usarJson) {
+    modoCargaGrupo = usarJson ? 'archivos' : 'catalogo';
+    origenDatosGrp = usarJson ? 'archivos' : (catalogoDisponible ? 'api' : 'ninguno');
+    generarTarjetasAlumnos();
+}
+
 function generarTarjetasAlumnos() {
     const n = document.getElementById('num-students').value;
     const cont = document.getElementById('students-container');
     groupStudents = [];
-    if (!catalogoDisponible) {
+    const usarCatalogo = catalogoDisponible && modoCargaGrupo !== 'archivos';
+    if (!usarCatalogo) {
         sedesGrpGlobales.clear(); // Limpiamos sedes previas si no hay catálogo
     }
     document.getElementById('group-filters-section').style.display = 'none';
-    const usarCatalogo = catalogoDisponible;
     const cards = [];
+    origenDatosGrp = usarCatalogo ? 'api' : 'archivos';
 
     for (let i = 0; i < n; i++) {
         groupStudents.push({ name: `Alumno ${i+1}`, courses: [], data: {} });
@@ -431,6 +445,9 @@ async function readStudentFiles(event, index) {
     const files = event.target.files || event.dataTransfer.files;
     let student = groupStudents[index];
     origenDatosGrp = 'archivos';
+    modoCargaGrupo = 'archivos';
+    const toggle = document.getElementById('group-use-json');
+    if (toggle && !toggle.checked) toggle.checked = true;
     student.courses = [];
     student.data = {};
 
@@ -484,7 +501,7 @@ async function iniciarGeneracionGrupal() {
         return;
     }
 
-    const usarApi = catalogoDisponible && origenDatosGrp !== 'archivos';
+    const usarApi = catalogoDisponible && modoCargaGrupo !== 'archivos';
     horariosGrp = [];
 
     if (usarApi) {
@@ -721,6 +738,238 @@ function renderSchedule(index) {
 }
 
 // ==========================================
+// --- CRUD DEL CATÁLOGO (ADMIN) ---
+// ==========================================
+
+function setBuilderStatus(message, isError = false) {
+    const status = document.getElementById('builder-status');
+    if (!status) return;
+    status.style.color = isError ? '#e74c3c' : '#27ae60';
+    status.innerText = message;
+}
+
+function actualizarSelectorCursosServidor() {
+    const select = document.getElementById('builder-course-select');
+    if (!select) return;
+    const selectedValue = select.value;
+    select.innerHTML = '<option value="">-- Selecciona un curso --</option>';
+    builderCursosServidor.forEach(curso => {
+        const option = document.createElement('option');
+        option.value = String(curso.id);
+        option.textContent = curso.nombre || `Curso ${curso.id}`;
+        select.appendChild(option);
+    });
+
+    if (builderCursoActualId) {
+        select.value = String(builderCursoActualId);
+    } else if (selectedValue) {
+        select.value = selectedValue;
+    }
+}
+
+async function cargarCursosServidor() {
+    setBuilderStatus('Cargando cursos del servidor...');
+    try {
+        const response = await fetch('/api/admin/cursos');
+        if (!response.ok) {
+            const mensaje = await response.text();
+            throw new Error(mensaje || 'No se pudo cargar el catálogo admin.');
+        }
+        const data = await response.json();
+        builderCursosServidor = Array.isArray(data) ? data : [];
+        actualizarSelectorCursosServidor();
+        if (builderCursosServidor.length === 0) {
+            setBuilderStatus('No hay cursos guardados en el servidor.');
+        } else {
+            setBuilderStatus(`Cursos disponibles en el servidor: ${builderCursosServidor.length}.`);
+        }
+    } catch (error) {
+        console.error(error);
+        setBuilderStatus('No se pudo cargar el catálogo del servidor.', true);
+    }
+}
+
+function aplicarCursoServidor(curso) {
+    if (!curso) return;
+    builderCursoActualId = curso.id;
+    document.getElementById('builder-course-name').value = curso.nombre || '';
+    editorData = (curso.secciones || []).map(seccion => ({
+        seccion: seccion.codigo || '',
+        sede: seccion.sede || '',
+        profesor: seccion.profesor || '',
+        sesiones: (seccion.sesiones || []).map(sesion => ({
+            dia: sesion.dia,
+            inicio: sesion.horaInicio,
+            fin: sesion.horaFin
+        }))
+    }));
+    renderBuilder();
+    setBuilderStatus(`Curso "${curso.nombre}" cargado desde el servidor.`);
+    actualizarSelectorCursosServidor();
+}
+
+function cargarCursoServidorSeleccionado() {
+    const select = document.getElementById('builder-course-select');
+    if (!select || !select.value) {
+        setBuilderStatus('Selecciona un curso del servidor para cargar.', true);
+        return;
+    }
+    const cursoId = Number(select.value);
+    const curso = builderCursosServidor.find(item => item.id === cursoId);
+    if (!curso) {
+        setBuilderStatus('Curso no encontrado. Actualiza la lista.', true);
+        return;
+    }
+    aplicarCursoServidor(curso);
+}
+
+async function eliminarSeccionesCursoServidor(cursoId) {
+    const response = await fetch(`/api/admin/secciones?cursoId=${cursoId}`);
+    if (!response.ok) {
+        const mensaje = await response.text();
+        throw new Error(mensaje || 'No se pudieron cargar las secciones.');
+    }
+    const secciones = await response.json();
+    if (!Array.isArray(secciones)) return;
+    for (const seccion of secciones) {
+        const deleteResponse = await fetch(`/api/admin/secciones/${seccion.id}`, { method: 'DELETE' });
+        if (!deleteResponse.ok) {
+            const mensaje = await deleteResponse.text();
+            throw new Error(mensaje || 'No se pudo eliminar una sección.');
+        }
+    }
+}
+
+async function guardarCursoServidor() {
+    const nombreCurso = document.getElementById('builder-course-name').value.trim();
+    if (!nombreCurso) {
+        setBuilderStatus('El nombre del curso es obligatorio.', true);
+        return;
+    }
+    if (!Array.isArray(editorData) || editorData.length === 0) {
+        setBuilderStatus('Agrega al menos una sección antes de guardar.', true);
+        return;
+    }
+
+    for (const sec of editorData) {
+        if (!sec.seccion || !sec.sede) {
+            setBuilderStatus('Todas las secciones necesitan código y sede.', true);
+            return;
+        }
+        if (!Array.isArray(sec.sesiones) || sec.sesiones.length === 0) {
+            setBuilderStatus(`La sección ${sec.seccion || '(sin código)'} no tiene horarios.`, true);
+            return;
+        }
+        for (const sesion of sec.sesiones) {
+            if (!sesion.dia || !sesion.inicio || !sesion.fin) {
+                setBuilderStatus('Completa día y horas de cada sesión.', true);
+                return;
+            }
+        }
+    }
+
+    setBuilderStatus('Guardando curso en el servidor...');
+
+    try {
+        let cursoId = builderCursoActualId;
+        if (!cursoId) {
+            const response = await fetch('/api/admin/cursos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre: nombreCurso })
+            });
+            if (!response.ok) {
+                const mensaje = await response.text();
+                throw new Error(mensaje || 'No se pudo crear el curso.');
+            }
+            const created = await response.json();
+            cursoId = created.id;
+        } else {
+            const response = await fetch(`/api/admin/cursos/${cursoId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre: nombreCurso })
+            });
+            if (!response.ok) {
+                const mensaje = await response.text();
+                throw new Error(mensaje || 'No se pudo actualizar el curso.');
+            }
+            await eliminarSeccionesCursoServidor(cursoId);
+        }
+
+        for (const sec of editorData) {
+            const response = await fetch('/api/admin/secciones', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    cursoId,
+                    codigo: sec.seccion.trim(),
+                    sede: sec.sede.trim(),
+                    profesor: (sec.profesor || '').trim()
+                })
+            });
+            if (!response.ok) {
+                const mensaje = await response.text();
+                throw new Error(mensaje || 'No se pudo crear una sección.');
+            }
+            const seccionCreada = await response.json();
+            const seccionId = seccionCreada.id;
+
+            for (const sesion of sec.sesiones) {
+                const sesionResponse = await fetch('/api/admin/sesiones', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        seccionId,
+                        dia: sesion.dia,
+                        horaInicio: sesion.inicio,
+                        horaFin: sesion.fin
+                    })
+                });
+                if (!sesionResponse.ok) {
+                    const mensaje = await sesionResponse.text();
+                    throw new Error(mensaje || 'No se pudo crear una sesión.');
+                }
+            }
+        }
+
+        builderCursoActualId = cursoId;
+        await cargarCursosServidor();
+        setBuilderStatus('Curso guardado correctamente en el servidor.');
+    } catch (error) {
+        console.error(error);
+        setBuilderStatus(error.message || 'No se pudo guardar el curso en el servidor.', true);
+    }
+}
+
+async function eliminarCursoServidor() {
+    const select = document.getElementById('builder-course-select');
+    const cursoId = builderCursoActualId || (select && select.value ? Number(select.value) : null);
+    if (!cursoId) {
+        setBuilderStatus('Selecciona un curso cargado para eliminar.', true);
+        return;
+    }
+
+    setBuilderStatus('Eliminando curso del servidor...');
+    try {
+        const response = await fetch(`/api/admin/cursos/${cursoId}`, { method: 'DELETE' });
+        if (!response.ok) {
+            const mensaje = await response.text();
+            throw new Error(mensaje || 'No se pudo eliminar el curso.');
+        }
+        builderCursoActualId = null;
+        editorData = [];
+        document.getElementById('builder-course-name').value = '';
+        renderBuilder();
+        await cargarCursosServidor();
+        setBuilderStatus('Curso eliminado del servidor.');
+    } catch (error) {
+        console.error(error);
+        setBuilderStatus(error.message || 'No se pudo eliminar el curso.', true);
+    }
+}
+
+// ==========================================
 // --- LÓGICA DEL EDITOR DE CURSOS (JSON) ---
 // ==========================================
 
@@ -747,8 +996,11 @@ async function cargarJsonParaEditar(event) {
             sesiones: Array.isArray(sec.sesiones) ? sec.sesiones : []
         }));
 
+        builderCursoActualId = null;
         document.getElementById('builder-course-name').value = file.name.replace('.json', '');
         renderBuilder();
+        actualizarSelectorCursosServidor();
+        setBuilderStatus(`JSON cargado: ${file.name}. Puedes guardar en el servidor si quieres.`);
 
     } catch (e) {
         console.error(e);
@@ -871,4 +1123,5 @@ function descargarJSON() {
 
 document.addEventListener('DOMContentLoaded', () => {
     cargarCatalogoDesdeApi();
+    cargarCursosServidor();
 });
