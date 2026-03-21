@@ -9,7 +9,7 @@
         "fin": "9:59pm"
       },
       {
-        "dia": "Mié",
+        "dia": "Mie",
         "inicio": "7:00pm",
         "fin": "8:59pm"
       }
@@ -21,7 +21,7 @@
     "sede": "Virtual",
     "sesiones": [
       {
-        "dia": "Mié",
+        "dia": "Mie",
         "inicio": "9:00pm",
         "fin": "10:59pm"
       },
@@ -48,7 +48,7 @@
         "fin": "12:59pm"
       }
     ],
-    "profesor": "Robles Fernández, Ivan"
+    "profesor": "Robles Fernandez, Ivan"
   },
   {
     "seccion": "11848",
@@ -60,7 +60,7 @@
         "fin": "12:59pm"
       },
       {
-        "dia": "Sáb",
+        "dia": "Sab",
         "inicio": "3:00pm",
         "fin": "4:59pm"
       }
@@ -77,12 +77,12 @@
         "fin": "9:59am"
       },
       {
-        "dia": "Mié",
+        "dia": "Mie",
         "inicio": "9:00am",
         "fin": "10:59am"
       }
     ],
-    "profesor": "Robles Fernández, Ivan"
+    "profesor": "Robles Fernandez, Ivan"
   },
   {
     "seccion": "11881",
@@ -99,7 +99,7 @@
         "fin": "8:59am"
       }
     ],
-    "profesor": "Bautista Ubillús, Efraín Ricardo"
+    "profesor": "Bautista Ubillus, Efrain Ricardo"
   },
   {
     "seccion": "11896",
@@ -116,7 +116,7 @@
         "fin": "8:59pm"
       }
     ],
-    "profesor": "Bautista Ubillús, Efraín Ricardo"
+    "profesor": "Bautista Ubillus, Efrain Ricardo"
   },
   {
     "seccion": "11913",
@@ -140,7 +140,7 @@
     "sede": "San Miguel",
     "sesiones": [
       {
-        "dia": "Sáb",
+        "dia": "Sab",
         "inicio": "6:00pm",
         "fin": "8:59pm"
       },
@@ -169,55 +169,55 @@
     ],
     "profesor": "Flores Moroco, Juan Antonio"
   },
-{
-  "seccion": "12010",
-  "sede": "San Isidro",
-  "sesiones": [
-    {
-      "dia": "Jue",
-      "inicio": "7:00am",
-      "fin": "9:59am"
-    },
-    {
-      "dia": "Vie",
-      "inicio": "7:00am",
-      "fin": "8:59am"
-    }
-  ],
-  "profesor": "Robles Fernández, Ivan"
-},
-{
-  "seccion": "12029",
-  "sede": "San Isidro",
-  "sesiones": [
-    {
-      "dia": "Mar",
-      "inicio": "7:00am",
-      "fin": "8:59am"
-    },
-    {
-      "dia": "Vie",
-      "inicio": "6:00pm",
-      "fin": "8:59pm"
-    }
-  ],
-  "profesor": "Mori Paiva, Hugo Allan"
-},
-{
-  "seccion": "17952",
-  "sede": "Monterrico",
-  "sesiones": [
-    {
-      "dia": "Mar",
-      "inicio": "10:00am",
-      "fin": "12:59pm"
-    },
-    {
-      "dia": "Mié",
-      "inicio": "7:00am",
-      "fin": "8:59am"
-    }
-  ],
-  "profesor": "Robles Fernández, Ivan"
-}
+  {
+    "seccion": "12010",
+    "sede": "San Isidro",
+    "sesiones": [
+      {
+        "dia": "Jue",
+        "inicio": "7:00am",
+        "fin": "9:59am"
+      },
+      {
+        "dia": "Vie",
+        "inicio": "7:00am",
+        "fin": "8:59am"
+      }
+    ],
+    "profesor": "Robles Fernandez, Ivan"
+  },
+  {
+    "seccion": "12029",
+    "sede": "San Isidro",
+    "sesiones": [
+      {
+        "dia": "Mar",
+        "inicio": "7:00am",
+        "fin": "8:59am"
+      },
+      {
+        "dia": "Vie",
+        "inicio": "6:00pm",
+        "fin": "8:59pm"
+      }
+    ],
+    "profesor": "Mori Paiva, Hugo Allan"
+  },
+  {
+    "seccion": "17952",
+    "sede": "Monterrico",
+    "sesiones": [
+      {
+        "dia": "Mar",
+        "inicio": "10:00am",
+        "fin": "12:59pm"
+      },
+      {
+        "dia": "Mie",
+        "inicio": "7:00am",
+        "fin": "8:59am"
+      }
+    ],
+    "profesor": "Robles Fernandez, Ivan"
+  }
 ]
