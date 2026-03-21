@@ -34,6 +34,6 @@ public static class TimeParser
 
     public static string ToDisplay(TimeSpan value)
     {
-        return value.ToString("h:mmtt", CultureInfo.InvariantCulture).ToLowerInvariant();
+        return DateTime.Today.Add(value).ToString("h:mmtt", CultureInfo.InvariantCulture).ToLowerInvariant();
     }
 }

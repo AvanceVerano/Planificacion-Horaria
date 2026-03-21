@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using HorariosPro.Api.Models;
+using HorariosPro.Api.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace HorariosPro.Api.Data;
@@ -103,11 +104,9 @@ public static class JsonSeedData
         }
 
         var limpio = valor.Trim();
-        var formatos = new[] { "h:mmtt", "hh:mmtt", "h:mm tt", "hh:mm tt" };
-
-        if (DateTime.TryParseExact(limpio, formatos, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out var fecha))
+        if (TimeParser.TryParse(limpio, out var resultado))
         {
-            return fecha.TimeOfDay;
+            return resultado;
         }
 
         throw new FormatException($"No se pudo interpretar la hora '{valor}'.");
