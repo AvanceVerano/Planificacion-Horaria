@@ -1,0 +1,6 @@
+@HorariosPro.Api_HostAddress = http://localhost:5067
+
+GET {{HorariosPro.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
