@@ -149,23 +149,23 @@ function aplicarCatalogo(data) {
 
 function renderCatalogoIndividual() {
     const sedesCont = document.getElementById('sedes-container');
-    sedesCont.innerHTML = '';
     if (sedesInd.size === 0) {
         sedesCont.innerHTML = '<em style="color:#999;">No hay sedes disponibles.</em>';
     } else {
-        Array.from(sedesInd).sort().forEach(s =>
-            sedesCont.innerHTML += `<label class="checkbox-item"><input type="checkbox" class="chk-sede" value="${escapeHtml(s)}" checked> ${escapeHtml(s)}</label>`
-        );
+        const sedesHtml = Array.from(sedesInd).sort().map(s =>
+            `<label class="checkbox-item"><input type="checkbox" class="chk-sede" value="${escapeHtml(s)}" checked> ${escapeHtml(s)}</label>`
+        ).join('');
+        sedesCont.innerHTML = sedesHtml;
     }
 
     const cursosCont = document.getElementById('cursos-container');
-    cursosCont.innerHTML = '';
     if (Object.keys(cursosDataInd).length === 0) {
         cursosCont.innerHTML = '<em style="color:#999;">No hay cursos disponibles.</em>';
     } else {
-        Object.keys(cursosDataInd).sort().forEach(c =>
-            cursosCont.innerHTML += `<label class="checkbox-item"><input type="checkbox" class="chk-curso" value="${escapeHtml(c)}" checked> ${escapeHtml(c)}</label>`
-        );
+        const cursosHtml = Object.keys(cursosDataInd).sort().map(c =>
+            `<label class="checkbox-item"><input type="checkbox" class="chk-curso" value="${escapeHtml(c)}" checked> ${escapeHtml(c)}</label>`
+        ).join('');
+        cursosCont.innerHTML = cursosHtml;
     }
 
     document.getElementById('btn-generar').disabled = Object.keys(cursosDataInd).length === 0;
@@ -328,13 +328,13 @@ let sedesGrpGlobales = new Set(); // Guarda las sedes de todos los JSON del grup
 function generarTarjetasAlumnos() {
     const n = document.getElementById('num-students').value;
     const cont = document.getElementById('students-container');
-    cont.innerHTML = '';
     groupStudents = [];
     if (!catalogoDisponible) {
         sedesGrpGlobales.clear(); // Limpiamos sedes previas si no hay catálogo
     }
     document.getElementById('group-filters-section').style.display = 'none';
     const usarCatalogo = catalogoDisponible;
+    const cards = [];
 
     for (let i = 0; i < n; i++) {
         groupStudents.push({ name: `Alumno ${i+1}`, courses: [], data: {} });
@@ -343,9 +343,9 @@ function generarTarjetasAlumnos() {
                 ? '<div style="flex:2; color:#999; font-size:12px;">No hay cursos disponibles.</div>'
                 : `<div style="flex:2;">` +
                   `<div class="checkbox-grid">` + catalogoCursos.map(curso => {
-                    const safeCurso = JSON.stringify(curso);
                     const safeLabel = escapeHtml(curso);
-                    return `<label class="checkbox-item"><input type="checkbox" value="${safeLabel}" onchange="toggleCursoAlumno(${i}, ${safeCurso}, this.checked)"> ${safeLabel}</label>`;
+                    const encodedCurso = encodeURIComponent(curso);
+                    return `<label class="checkbox-item"><input type="checkbox" class="chk-curso-grp" data-student="${i}" data-curso="${encodedCurso}" value="${safeLabel}"> ${safeLabel}</label>`;
                 }).join('') + `</div></div>`)
             : `
                 <div class="student-drop" 
@@ -360,7 +360,7 @@ function generarTarjetasAlumnos() {
                     <input type="file" id="file-input-grp-${i}" multiple accept=".json" style="display:none;" onchange="readStudentFiles(event, ${i})">
                 </div>`;
 
-        cont.innerHTML += `
+        cards.push(`
             <div class="student-card">
                 <div class="student-info">
                     <label style="font-weight:bold; color: #2c3e50;">Nombre:</label>
@@ -368,11 +368,19 @@ function generarTarjetasAlumnos() {
                     <div id="stu-courses-${i}" class="student-courses-list">Cursos: 0 seleccionados</div>
                 </div>
                 ${cursosHtml}
-            </div>`;
+            </div>`);
     }
+    cont.innerHTML = cards.join('');
     document.getElementById('btn-generar-grupo').style.display = 'block';
     if (usarCatalogo) {
         actualizarFiltrosGrupales();
+        cont.querySelectorAll('.chk-curso-grp').forEach(input => {
+            input.addEventListener('change', event => {
+                const index = Number(event.target.dataset.student);
+                const curso = decodeURIComponent(event.target.dataset.curso || '');
+                toggleCursoAlumno(index, curso, event.target.checked);
+            });
+        });
     }
 }
 
@@ -451,12 +459,11 @@ function actualizarFiltrosGrupales() {
     
     if (sedesGrpGlobales.size > 0) {
         section.style.display = 'block';
-        Array.from(sedesGrpGlobales).sort().forEach(sede => {
-            container.innerHTML += `
+        const sedesHtml = Array.from(sedesGrpGlobales).sort().map(sede => `
                 <label class="checkbox-item">
                     <input type="checkbox" class="chk-sede-grp" value="${escapeHtml(sede)}" checked> ${escapeHtml(sede)}
-                </label>`;
-        });
+                </label>`).join('');
+        container.innerHTML = sedesHtml;
     }
 }
 
