@@ -824,7 +824,7 @@ function cargarCursoServidorSeleccionado() {
 }
 
 async function eliminarSeccionesCursoServidor(cursoId) {
-    const response = await fetch(`/api/admin/secciones?cursoId=${cursoId}`);
+    const response = await fetch(`/api/admin/secciones?cursoId=${encodeURIComponent(cursoId)}`);
     if (!response.ok) {
         const mensaje = await response.text();
         throw new Error(mensaje || 'No se pudieron cargar las secciones.');
