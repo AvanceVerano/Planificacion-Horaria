@@ -12,19 +12,25 @@ Una aplicación web pura (HTML/CSS/JS) diseñada para resolver el problema de sa
 
 ## 🛠️ Tecnologías Utilizadas
 
-* **Frontend:** HTML5, CSS3, Vanilla JavaScript (ES6+).
+* **Frontend:** HTML5, CSS3, Vanilla JavaScript (ES6+). Se añadió un nuevo shell en `/frontend` basado en **Vue 3 + Vite** con **Vuetify** y **Pinia** para la vista pública/admin.
 * **Algoritmia:** Búsqueda en Profundidad (DFS) y Backtracking para la evaluación de colisiones temporales y filtrado de ramas inválidas.
 * **Formatos:** JSON para la persistencia y transferencia de datos de los cursos.
 
 ## 🚀 Cómo Usarlo
 
 1.  Clona el repositorio o descarga los archivos.
-2.  Abre `index.html` en cualquier navegador web moderno.
-3.  Dirígete a la pestaña **Creador** para estructurar tus cursos, o utiliza archivos JSON existentes.
-4.  En la pestaña **Individual** o **Grupal**, arrastra tus archivos `.json` a la zona de carga.
-5.  Aplica tus filtros de sede y presiona **Generar**.
-6.  Navega entre las opciones generadas y guarda tus favoritas.
-7.  Usa `Ctrl + P` (o `Cmd + P`) en la vista del calendario para exportar tu horario a PDF.
+2.  Para la versión clásica, abre `index.html` en cualquier navegador web moderno.
+3.  Para el nuevo shell Vue (pública/admin) instala dependencias y levanta el dev server:
+    ```bash
+    cd frontend
+    npm install
+    npm run dev
+    ```
+4.  En la pestaña **Creador** del clásico puedes estructurar tus cursos, o usar los endpoints del backend desde el shell Vue.
+5.  En la pestaña **Individual** o **Grupal**, arrastra tus archivos `.json` a la zona de carga (versión clásica).
+6.  Aplica tus filtros de sede y presiona **Generar**.
+7.  Navega entre las opciones generadas y guarda tus favoritas.
+8.  Usa `Ctrl + P` (o `Cmd + P`) en la vista del calendario para exportar tu horario a PDF.
 
 ## 📂 Estructura del JSON (Ejemplo)
 
