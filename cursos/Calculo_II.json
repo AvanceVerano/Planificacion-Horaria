@@ -1,0 +1,223 @@
+[
+  {
+    "seccion": "4068",
+    "sede": "Monterrico",
+    "sesiones": [
+      {
+        "dia": "Lun",
+        "inicio": "11:00am",
+        "fin": "12:59pm"
+      },
+      {
+        "dia": "Jue",
+        "inicio": "11:00am",
+        "fin": "12:59pm"
+      }
+    ],
+    "profesor": ""
+  },
+  {
+    "seccion": "4072",
+    "sede": "Monterrico",
+    "sesiones": [
+      {
+        "dia": "Mié",
+        "inicio": "9:00am",
+        "fin": "10:59am"
+      },
+      {
+        "dia": "Sáb",
+        "inicio": "9:00am",
+        "fin": "10:59am"
+      }
+    ],
+    "profesor": "Muñoz Ramos, Luis Daniel"
+  },
+  {
+    "seccion": "4078",
+    "sede": "Virtual",
+    "sesiones": [
+      {
+        "dia": "Mié",
+        "inicio": "11:00am",
+        "fin": "12:59pm"
+      },
+      {
+        "dia": "Sáb",
+        "inicio": "11:00am",
+        "fin": "12:59pm"
+      }
+    ],
+    "profesor": "Muñoz Ramos, Luis Daniel"
+  },
+  {
+    "seccion": "4079",
+    "sede": "Monterrico",
+    "sesiones": [
+      {
+        "dia": "Mié",
+        "inicio": "7:00am",
+        "fin": "8:59am"
+      },
+      {
+        "dia": "Sáb",
+        "inicio": "7:00am",
+        "fin": "8:59am"
+      }
+    ],
+    "profesor": "Muñoz Ramos, Luis Daniel"
+  },
+  {
+    "seccion": "4082",
+    "sede": "Virtual",
+    "sesiones": [
+      {
+        "dia": "Lun",
+        "inicio": "7:00am",
+        "fin": "8:59am"
+      },
+      {
+        "dia": "Vie",
+        "inicio": "7:00am",
+        "fin": "8:59am"
+      }
+    ],
+    "profesor": "Rojas Villanueva, Joel Hernan"
+  },
+  {
+    "seccion": "4093",
+    "sede": "San Isidro",
+    "sesiones": [
+      {
+        "dia": "Lun",
+        "inicio": "3:00pm",
+        "fin": "4:59pm"
+      },
+      {
+        "dia": "Jue",
+        "inicio": "3:00pm",
+        "fin": "4:59pm"
+      }
+    ],
+    "profesor": "Cruzado Quispe, Ever Franklin"
+  },
+  {
+    "seccion": "4096",
+    "sede": "Virtual",
+    "sesiones": [
+      {
+        "dia": "Mar",
+        "inicio": "7:00am",
+        "fin": "8:59am"
+      },
+      {
+        "dia": "Sáb",
+        "inicio": "7:00am",
+        "fin": "8:59am"
+      }
+    ],
+    "profesor": "Cruzado Quispe, Ever Franklin"
+  },
+  {
+    "seccion": "4100",
+    "sede": "San Miguel",
+    "sesiones": [
+      {
+        "dia": "Lun",
+        "inicio": "3:00pm",
+        "fin": "4:59pm"
+      },
+      {
+        "dia": "Jue",
+        "inicio": "3:00pm",
+        "fin": "4:59pm"
+      }
+    ],
+    "profesor": "Accostupa Huamán, Juan"
+  },
+  {
+    "seccion": "4113",
+    "sede": "San Miguel",
+    "sesiones": [
+      {
+        "dia": "Lun",
+        "inicio": "1:00pm",
+        "fin": "2:59pm"
+      },
+      {
+        "dia": "Jue",
+        "inicio": "1:00pm",
+        "fin": "2:59pm"
+      }
+    ],
+    "profesor": "Accostupa Huamán, Juan"
+  },
+  {
+    "seccion": "4116",
+    "sede": "San Miguel",
+    "sesiones": [
+      {
+        "dia": "Lun",
+        "inicio": "11:00am",
+        "fin": "12:59pm"
+      },
+      {
+        "dia": "Mié",
+        "inicio": "1:00pm",
+        "fin": "2:59pm"
+      }
+    ],
+    "profesor": "Novoa Allagual, Armando Alfredo"
+  },
+{
+  "seccion": "4280",
+  "sede": "Villa",
+  "sesiones": [
+    {
+      "dia": "Lun",
+      "inicio": "1:00pm",
+      "fin": "2:59pm"
+    },
+    {
+      "dia": "Mié",
+      "inicio": "1:00pm",
+      "fin": "2:59pm"
+    }
+  ],
+  "profesor": "Rojas Villanueva, Joel Hernan"
+},
+{
+  "seccion": "4287",
+  "sede": "Villa",
+  "sesiones": [
+    {
+      "dia": "Lun",
+      "inicio": "9:00am",
+      "fin": "10:59am"
+    },
+    {
+      "dia": "Vie",
+      "inicio": "9:00am",
+      "fin": "10:59am"
+    }
+  ],
+  "profesor": "Rojas Villanueva, Joel Hernan"
+},
+{
+  "seccion": "16447",
+  "sede": "Virtual",
+  "sesiones": [
+    {
+      "dia": "Mar",
+      "inicio": "11:00am",
+      "fin": "12:59pm"
+    },
+    {
+      "dia": "Vie",
+      "inicio": "11:00am",
+      "fin": "12:59pm"
+    }
+  ],
+  "profesor": "Principe Jimenez, Luis Ronald"
+}
+]

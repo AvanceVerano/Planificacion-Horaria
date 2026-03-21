@@ -1,0 +1,101 @@
+[
+  {
+    "seccion": "10203",
+    "sede": "Virtual",
+    "sesiones": [
+      { "dia": "Mié", "inicio": "7:00pm", "fin": "9:59pm" },
+      { "dia": "Lun", "inicio": "7:00pm", "fin": "8:59pm" }
+    ],
+    "profesor": "Sánchez Ponce, Alex Humberto"
+  },
+  {
+    "seccion": "10215",
+    "sede": "Virtual",
+    "sesiones": [
+      { "dia": "Mar", "inicio": "7:00pm", "fin": "9:59pm" },
+      { "dia": "Jue", "inicio": "7:00pm", "fin": "8:59pm" }
+    ],
+    "profesor": "Velasquez Nuñez, Angel Augusto"
+  },
+  {
+    "seccion": "12053",
+    "sede": "Monterrico",
+    "sesiones": [
+      { "dia": "Mié", "inicio": "7:00pm", "fin": "9:59pm" },
+      { "dia": "Sáb", "inicio": "9:00am", "fin": "10:59am" }
+    ],
+    "profesor": "Bautista Ubillús, Efraín Ricardo"
+  },
+  {
+    "seccion": "12144",
+    "sede": "Monterrico",
+    "sesiones": [
+      { "dia": "Mié", "inicio": "7:00am", "fin": "9:59am" },
+      { "dia": "Sáb", "inicio": "7:00am", "fin": "8:59am" }
+    ],
+    "profesor": "Bautista Ubillús, Efraín Ricardo"
+  },
+  {
+    "seccion": "12158",
+    "sede": "Villa",
+    "sesiones": [
+      { "dia": "Lun", "inicio": "4:00pm", "fin": "6:59pm" },
+      { "dia": "Sáb", "inicio": "11:00am", "fin": "12:59pm" }
+    ],
+    "profesor": "Villafuerte Bazan, Oscar Ivan"
+  },
+  {
+    "seccion": "12190",
+    "sede": "San Miguel",
+    "sesiones": [
+      { "dia": "Sáb", "inicio": "7:00am", "fin": "9:59am" },
+      { "dia": "Sáb", "inicio": "10:00am", "fin": "11:59am" }
+    ],
+    "profesor": "Mori Paiva, Hugo Allan"
+  },
+  {
+    "seccion": "12206",
+    "sede": "San Miguel",
+    "sesiones": [
+      { "dia": "Vie", "inicio": "4:00pm", "fin": "6:59pm" },
+      { "dia": "Jue", "inicio": "3:00pm", "fin": "4:59pm" }
+    ],
+    "profesor": "Velasquez Nuñez, Angel Augusto"
+  },
+  {
+    "seccion": "12242",
+    "sede": "San Isidro",
+    "sesiones": [
+      { "dia": "Lun", "inicio": "10:00am", "fin": "12:59pm" },
+      { "dia": "Mié", "inicio": "9:00am", "fin": "10:59am" }
+    ],
+    "profesor": "Velasquez Nuñez, Angel Augusto"
+  },
+  {
+    "seccion": "12258",
+    "sede": "San Isidro",
+    "sesiones": [
+      { "dia": "Lun", "inicio": "4:00pm", "fin": "6:59pm" },
+      { "dia": "Mié", "inicio": "12:00pm", "fin": "1:59pm" }
+    ],
+    "profesor": "Velasquez Nuñez, Angel Augusto"
+  },
+  {
+    "seccion": "12263",
+    "sede": "San Isidro",
+    "sesiones": [
+      { "dia": "Mar", "inicio": "8:00pm", "fin": "10:59pm" },
+      { "dia": "Jue", "inicio": "7:00pm", "fin": "8:59pm" }
+    ],
+    "profesor": "Castro Veramendi, Rafael Oswaldo"
+  },
+   {
+    "seccion": "17953",
+    "sede": "Monterrico",
+    "sesiones": [
+      { "dia": "Mar", "inicio": "7:00am", "fin": "9:59am" },
+      { "dia": "Mié", "inicio": "10:00am", "fin": "11:59am" }
+    ],
+    "profesor": "Sánchez Ponce, Alex Humberto"
+  }
+]

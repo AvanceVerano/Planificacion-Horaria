@@ -1,0 +1,338 @@
+[
+  {
+    "seccion": "6159",
+    "sede": "Monterrico",
+    "sesiones": [
+      {
+        "dia": "Vie",
+        "inicio": "7:00am",
+        "fin": "9:59am"
+      }
+    ],
+    "profesor": "Torres Anaya, Natali Del Pilar"
+  },
+  {
+    "seccion": "6161",
+    "sede": "Monterrico",
+    "sesiones": [
+      {
+        "dia": "Mié",
+        "inicio": "5:00pm",
+        "fin": "7:59pm"
+      }
+    ],
+    "profesor": "Miklavec Moreno, Angel David"
+  },
+  {
+    "seccion": "6165",
+    "sede": "Monterrico",
+    "sesiones": [
+      {
+        "dia": "Mié",
+        "inicio": "1:00pm",
+        "fin": "3:59pm"
+      }
+    ],
+    "profesor": "Cuadros Herrera, Carlos Enrique"
+  },
+  {
+    "seccion": "6166",
+    "sede": "Monterrico",
+    "sesiones": [
+      {
+        "dia": "Mié",
+        "inicio": "8:00pm",
+        "fin": "10:59pm"
+      }
+    ],
+    "profesor": "Miklavec Moreno, Angel David"
+  },
+  {
+    "seccion": "6167",
+    "sede": "Monterrico",
+    "sesiones": [
+      {
+        "dia": "Mié",
+        "inicio": "7:00am",
+        "fin": "9:59am"
+      }
+    ],
+    "profesor": "Osorio Mauricio, Lucila"
+  },
+  {
+    "seccion": "6169",
+    "sede": "Monterrico",
+    "sesiones": [
+      {
+        "dia": "Mié",
+        "inicio": "11:00am",
+        "fin": "1:59pm"
+      }
+    ],
+    "profesor": "Osorio Mauricio, Lucila"
+  },
+  {
+    "seccion": "6175",
+    "sede": "Monterrico",
+    "sesiones": [
+      {
+        "dia": "Vie",
+        "inicio": "10:00am",
+        "fin": "12:59pm"
+      }
+    ],
+    "profesor": "Torres Anaya, Natali Del Pilar"
+  },
+  {
+    "seccion": "6177",
+    "sede": "Monterrico",
+    "sesiones": [
+      {
+        "dia": "Mié",
+        "inicio": "1:00pm",
+        "fin": "3:59pm"
+      }
+    ],
+    "profesor": "Acosta Ramírez, Salomón Ciro"
+  },
+  {
+    "seccion": "6178",
+    "sede": "Monterrico",
+    "sesiones": [
+      {
+        "dia": "Mié",
+        "inicio": "4:00pm",
+        "fin": "6:59pm"
+      }
+    ],
+    "profesor": "Pinillos Grijalba, Teresa Lucía"
+  },
+  {
+    "seccion": "6190",
+    "sede": "Virtual",
+    "sesiones": [
+      {
+        "dia": "Lun",
+        "inicio": "10:00am",
+        "fin": "12:59pm"
+      }
+    ],
+    "profesor": "Acosta Ramírez, Salomón Ciro"
+  },
+  {
+    "seccion": "6221",
+    "sede": "San Isidro",
+    "sesiones": [
+      {
+        "dia": "Mié",
+        "inicio": "4:00pm",
+        "fin": "6:59pm"
+      }
+    ],
+    "profesor": "Aviles Merens, Rafael Agustin"
+  },
+  {
+    "seccion": "6224",
+    "sede": "San Isidro",
+    "sesiones": [
+      {
+        "dia": "Sáb",
+        "inicio": "7:00am",
+        "fin": "9:59am"
+      }
+    ],
+    "profesor": "Diaz Ninaquispe, Jhair Jhonatan"
+  },
+  {
+    "seccion": "6230",
+    "sede": "San Isidro",
+    "sesiones": [
+      {
+        "dia": "Mar",
+        "inicio": "10:00am",
+        "fin": "12:59pm"
+      }
+    ],
+    "profesor": "Aviles Merens, Rafael Agustin"
+  },
+  {
+    "seccion": "6234",
+    "sede": "San Isidro",
+    "sesiones": [
+      {
+        "dia": "Mar",
+        "inicio": "1:00pm",
+        "fin": "3:59pm"
+      }
+    ],
+    "profesor": "Arenas Cardoza, Victor"
+  },
+  {
+    "seccion": "6237",
+    "sede": "Virtual",
+    "sesiones": [
+      {
+        "dia": "Vie",
+        "inicio": "7:00am",
+        "fin": "9:59am"
+      }
+    ],
+    "profesor": "Diaz Ninaquispe, Jhair Jhonatan"
+  },
+  {
+    "seccion": "6240",
+    "sede": "San Miguel",
+    "sesiones": [
+      {
+        "dia": "Mié",
+        "inicio": "4:00pm",
+        "fin": "6:59pm"
+      }
+    ],
+    "profesor": "Toribio Donayre, Juana Mercedes"
+  },
+  {
+    "seccion": "6245",
+    "sede": "San Miguel",
+    "sesiones": [
+      {
+        "dia": "Mar",
+        "inicio": "3:00pm",
+        "fin": "5:59pm"
+      }
+    ],
+    "profesor": "Piña Rucoba, Gilber Francisco"
+  },
+  {
+    "seccion": "6247",
+    "sede": "San Miguel",
+    "sesiones": [
+      {
+        "dia": "Jue",
+        "inicio": "10:00am",
+        "fin": "12:59pm"
+      }
+    ],
+    "profesor": "Piña Rucoba, Gilber Francisco"
+  },
+  {
+    "seccion": "6252",
+    "sede": "San Miguel",
+    "sesiones": [
+      {
+        "dia": "Mié",
+        "inicio": "10:00am",
+        "fin": "12:59pm"
+      }
+    ],
+    "profesor": "Vega Durand, Elba"
+  },
+  {
+    "seccion": "6256",
+    "sede": "San Miguel",
+    "sesiones": [
+      {
+        "dia": "Lun",
+        "inicio": "7:00am",
+        "fin": "9:59am"
+      }
+    ],
+    "profesor": "Pinillos Grijalba, Teresa Lucía"
+  },
+  {
+    "seccion": "6259",
+    "sede": "San Miguel",
+    "sesiones": [
+      {
+        "dia": "Mar",
+        "inicio": "9:00am",
+        "fin": "11:59am"
+      }
+    ],
+    "profesor": "Ramos Lopez, Wily Noel"
+  },
+  {
+    "seccion": "6300",
+    "sede": "Virtual",
+    "sesiones": [
+      {
+        "dia": "Lun",
+        "inicio": "11:00am",
+        "fin": "1:59pm"
+      }
+    ],
+    "profesor": "Ramos Lopez, Wily Noel"
+  },
+  {
+    "seccion": "6304",
+    "sede": "Villa",
+    "sesiones": [
+      {
+        "dia": "Vie",
+        "inicio": "3:00pm",
+        "fin": "5:59pm"
+      }
+    ],
+    "profesor": "Sanchez Mostacero, Gina Yudhit"
+  },
+  {
+    "seccion": "6307",
+    "sede": "Villa",
+    "sesiones": [
+      {
+        "dia": "Sáb",
+        "inicio": "7:00am",
+        "fin": "9:59am"
+      }
+    ],
+    "profesor": "Miklavec Moreno, Angel David"
+  },
+  {
+    "seccion": "6309",
+    "sede": "Villa",
+    "sesiones": [
+      {
+        "dia": "Mar",
+        "inicio": "4:00pm",
+        "fin": "6:59pm"
+      }
+    ],
+    "profesor": "Sanchez Mostacero, Gina Yudhit"
+  },
+  {
+    "seccion": "6310",
+    "sede": "Villa",
+    "sesiones": [
+      {
+        "dia": "Jue",
+        "inicio": "11:00am",
+        "fin": "1:59pm"
+      }
+    ],
+    "profesor": "Sanchez Mostacero, Gina Yudhit"
+  },
+  {
+    "seccion": "16528",
+    "sede": "San Miguel",
+    "sesiones": [
+      {
+        "dia": "Vie",
+        "inicio": "7:00am",
+        "fin": "9:59am"
+      }
+    ],
+    "profesor": "Ramos Lopez, Wily Noel"
+  },
+  {
+    "seccion": "16529",
+    "sede": "San Miguel",
+    "sesiones": [
+      {
+        "dia": "Vie",
+        "inicio": "10:00am",
+        "fin": "12:59pm"
+      }
+    ],
+    "profesor": "Aviles Merens, Rafael Agustin"
+  }
+]

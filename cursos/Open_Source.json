@@ -1,0 +1,223 @@
+[
+  {
+    "seccion": "10155",
+    "sede": "Virtual",
+    "sesiones": [
+      {
+        "dia": "Lun",
+        "inicio": "7:00pm",
+        "fin": "9:59pm"
+      },
+      {
+        "dia": "Mié",
+        "inicio": "7:00pm",
+        "fin": "8:59pm"
+      }
+    ],
+    "profesor": "Mori Paiva, Hugo Allan"
+  },
+  {
+    "seccion": "10177",
+    "sede": "Virtual",
+    "sesiones": [
+      {
+        "dia": "Mié",
+        "inicio": "9:00pm",
+        "fin": "10:59pm"
+      },
+      {
+        "dia": "Mar",
+        "inicio": "7:00pm",
+        "fin": "9:59pm"
+      }
+    ],
+    "profesor": "Mori Paiva, Hugo Allan"
+  },
+  {
+    "seccion": "11834",
+    "sede": "San Isidro",
+    "sesiones": [
+      {
+        "dia": "Lun",
+        "inicio": "7:00am",
+        "fin": "9:59am"
+      },
+      {
+        "dia": "Vie",
+        "inicio": "11:00am",
+        "fin": "12:59pm"
+      }
+    ],
+    "profesor": "Robles Fernández, Ivan"
+  },
+  {
+    "seccion": "11848",
+    "sede": "Villa",
+    "sesiones": [
+      {
+        "dia": "Mar",
+        "inicio": "10:00am",
+        "fin": "12:59pm"
+      },
+      {
+        "dia": "Sáb",
+        "inicio": "3:00pm",
+        "fin": "4:59pm"
+      }
+    ],
+    "profesor": "Velasquez Nuñez, Angel Augusto"
+  },
+  {
+    "seccion": "11863",
+    "sede": "Monterrico",
+    "sesiones": [
+      {
+        "dia": "Mar",
+        "inicio": "7:00am",
+        "fin": "9:59am"
+      },
+      {
+        "dia": "Mié",
+        "inicio": "9:00am",
+        "fin": "10:59am"
+      }
+    ],
+    "profesor": "Robles Fernández, Ivan"
+  },
+  {
+    "seccion": "11881",
+    "sede": "Monterrico",
+    "sesiones": [
+      {
+        "dia": "Lun",
+        "inicio": "7:00am",
+        "fin": "9:59am"
+      },
+      {
+        "dia": "Vie",
+        "inicio": "7:00am",
+        "fin": "8:59am"
+      }
+    ],
+    "profesor": "Bautista Ubillús, Efraín Ricardo"
+  },
+  {
+    "seccion": "11896",
+    "sede": "Monterrico",
+    "sesiones": [
+      {
+        "dia": "Lun",
+        "inicio": "8:00pm",
+        "fin": "10:59pm"
+      },
+      {
+        "dia": "Jue",
+        "inicio": "7:00pm",
+        "fin": "8:59pm"
+      }
+    ],
+    "profesor": "Bautista Ubillús, Efraín Ricardo"
+  },
+  {
+    "seccion": "11913",
+    "sede": "San Miguel",
+    "sesiones": [
+      {
+        "dia": "Lun",
+        "inicio": "9:00am",
+        "fin": "10:59am"
+      },
+      {
+        "dia": "Vie",
+        "inicio": "7:00am",
+        "fin": "9:59am"
+      }
+    ],
+    "profesor": "Flores Moroco, Juan Antonio"
+  },
+  {
+    "seccion": "11959",
+    "sede": "San Miguel",
+    "sesiones": [
+      {
+        "dia": "Sáb",
+        "inicio": "6:00pm",
+        "fin": "8:59pm"
+      },
+      {
+        "dia": "Jue",
+        "inicio": "7:00am",
+        "fin": "8:59am"
+      }
+    ],
+    "profesor": "Mori Paiva, Hugo Allan"
+  },
+  {
+    "seccion": "11990",
+    "sede": "San Miguel",
+    "sesiones": [
+      {
+        "dia": "Lun",
+        "inicio": "1:00pm",
+        "fin": "2:59pm"
+      },
+      {
+        "dia": "Mar",
+        "inicio": "4:00pm",
+        "fin": "6:59pm"
+      }
+    ],
+    "profesor": "Flores Moroco, Juan Antonio"
+  },
+{
+  "seccion": "12010",
+  "sede": "San Isidro",
+  "sesiones": [
+    {
+      "dia": "Jue",
+      "inicio": "7:00am",
+      "fin": "9:59am"
+    },
+    {
+      "dia": "Vie",
+      "inicio": "7:00am",
+      "fin": "8:59am"
+    }
+  ],
+  "profesor": "Robles Fernández, Ivan"
+},
+{
+  "seccion": "12029",
+  "sede": "San Isidro",
+  "sesiones": [
+    {
+      "dia": "Mar",
+      "inicio": "7:00am",
+      "fin": "8:59am"
+    },
+    {
+      "dia": "Vie",
+      "inicio": "6:00pm",
+      "fin": "8:59pm"
+    }
+  ],
+  "profesor": "Mori Paiva, Hugo Allan"
+},
+{
+  "seccion": "17952",
+  "sede": "Monterrico",
+  "sesiones": [
+    {
+      "dia": "Mar",
+      "inicio": "10:00am",
+      "fin": "12:59pm"
+    },
+    {
+      "dia": "Mié",
+      "inicio": "7:00am",
+      "fin": "8:59am"
+    }
+  ],
+  "profesor": "Robles Fernández, Ivan"
+}
+]
