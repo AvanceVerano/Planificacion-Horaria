@@ -9,9 +9,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@iconify-json/lucide": "^1.2.98",
     "pinia": "^3.0.4",
     "primeicons": "^7.0.0",
     "primevue": "^4.5.4",
+    "unplugin-icons": "^23.0.1",
     "vue": "^3.5.30"
   },
   "devDependencies": {
