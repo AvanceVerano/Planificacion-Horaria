@@ -185,9 +185,9 @@ function seccionCumpleFiltros(sec, bloqueos) {
 // --- UTILIDADES DE BITMASK ---
 // Día empieza a las 7:00 (Bit 0) y termina a las 23:00 (Bit 15).
 // Cada bit representa 1 hora. Ej.: 8:00–10:00 enciende los bits 1 y 2.
-const DIA_INDICES_BITMASK = { 'Lun': 0, 'Mar': 1, 'Mie': 2, 'Jue': 3, 'Vie': 4, 'Sab': 5 };
-const HORA_INICIO_BIT  = 7;   // El Bit 0 corresponde a las 7:00
-const TOTAL_BITS_DIA   = 16;  // Los bits 0–15 cubren las horas 7:00–23:00
+const DIA_A_INDICE      = { 'Lun': 0, 'Mar': 1, 'Mie': 2, 'Jue': 3, 'Vie': 4, 'Sab': 5 };
+const HORA_BASE_BITS    = 7;   // El Bit 0 corresponde a las 7:00
+const BITS_POR_DIA      = 16;  // Los bits 0–15 cubren las horas 7:00–23:00
 
 /**
  * Convierte un rango de tiempo (en minutos desde medianoche) a una máscara de bits.
@@ -195,8 +195,8 @@ const TOTAL_BITS_DIA   = 16;  // Los bits 0–15 cubren las horas 7:00–23:00
  * Ej.: inicioMin=480 (8:00), finMin=600 (10:00) → bits 1 y 2.
  */
 function minutosARangoBits(inicioMin, finMin) {
-    const startBit = Math.max(0, Math.floor(inicioMin / 60) - HORA_INICIO_BIT);
-    const endBit   = Math.min(TOTAL_BITS_DIA, Math.ceil(finMin / 60) - HORA_INICIO_BIT);
+    const startBit = Math.max(0, Math.floor(inicioMin / 60) - HORA_BASE_BITS);
+    const endBit   = Math.min(BITS_POR_DIA, Math.ceil(finMin / 60) - HORA_BASE_BITS);
     if (startBit >= endBit) return 0;
     return ((1 << (endBit - startBit)) - 1) << startBit;
 }
@@ -208,7 +208,7 @@ function minutosARangoBits(inicioMin, finMin) {
 function seccionToBitmasks(sec) {
     const mascaras = [0, 0, 0, 0, 0, 0];
     for (const ses of (sec.sesiones || [])) {
-        const diaIdx = DIA_INDICES_BITMASK[ses.dia];
+        const diaIdx = DIA_A_INDICE[ses.dia];
         if (diaIdx === undefined) continue;
         mascaras[diaIdx] |= minutosARangoBits(parseTime(ses.inicio), parseTime(ses.fin));
     }
@@ -222,11 +222,11 @@ function seccionToBitmasks(sec) {
 function bloqueosToBitmasks(bloqueos) {
     const mascaras = [0, 0, 0, 0, 0, 0];
     for (const [dia, bloqueoDia] of Object.entries(bloqueos || {})) {
-        const diaIdx = DIA_INDICES_BITMASK[dia];
+        const diaIdx = DIA_A_INDICE[dia];
         if (diaIdx === undefined) continue;
         if (bloqueoDia.diaLibre) {
             // Bloquear todas las ranuras horarias del día.
-            mascaras[diaIdx] = (1 << TOTAL_BITS_DIA) - 1;
+            mascaras[diaIdx] = (1 << BITS_POR_DIA) - 1;
             continue;
         }
         for (const rango of (bloqueoDia.rangos || [])) {

@@ -13,9 +13,9 @@ public class HorarioGenerator
     ///   2. Pre-filter sections that conflict with sede rules or user blocks (O(1) via bitmask AND).
     ///   3. Order courses by fewest valid sections (fail-fast heuristic).
     ///   4. DFS with a running mascaraActual[6] accumulator:
-    ///        - Push : mascaraActual[d] |= seccion.Mascaras[d]   (Bitwise OR)
-    ///        - Check: (mascaraActual[d] &amp; seccion.Mascaras[d]) != 0  → collision
-    ///        - Pop  : mascaraActual[d] &amp;= ~seccion.Mascaras[d]  (Bitwise AND NOT)
+    ///        - Push : mascaraActual[d] |= seccion.Mascaras[d]          (Bitwise OR)
+    ///        - Check: (mascaraActual[d] AND seccion.Mascaras[d]) != 0  → colisión
+    ///        - Pop  : mascaraActual[d] = mascaraActual[d] AND NOT seccion.Mascaras[d]
     /// </summary>
     public List<HorarioResultadoDto> GenerarIndividual(
         IEnumerable<Curso> cursos,
