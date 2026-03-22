@@ -162,14 +162,20 @@
           <div class="step" style="flex: 1; text-align: center; background: var(--surface);">
             <h3><IconUser class="app-icon" style="display:inline-block; vertical-align:middle;" /> Individuales</h3>
             <p id="fav-ind-status">0 guardados</p>
-            <label class="btn-secondary btn-full"><input type="file" accept=".json" hidden onchange="cargarFavs(event, 'ind')"><IconFolderOpen class="app-icon" /> Cargar JSON</label>
+            <input type="file" id="file-fav-ind" accept=".json" style="display:none;" aria-label="Cargar favoritos individuales desde JSON" onchange="cargarFavs(event, 'ind')">
+            <button class="btn-secondary btn-full" type="button" onclick="document.getElementById('file-fav-ind').click()">
+              <IconFolderOpen class="app-icon" /> Cargar JSON
+            </button>
             <button class="btn-main" style="margin-top: 10px;" onclick="verFavoritos('ind')"><IconEye class="app-icon" style="color:white;" /> Ver</button>
             <button class="btn-secondary btn-full" style="margin-top: 10px;" onclick="descargarFavs('ind')"><IconDownload class="app-icon" /> Descargar</button>
           </div>
           <div class="step" style="flex: 1; text-align: center; background: var(--surface);">
             <h3><IconUsers class="app-icon" style="display:inline-block; vertical-align:middle;" /> Grupales</h3>
             <p id="fav-grp-status">0 guardados</p>
-            <label class="btn-secondary btn-full"><input type="file" accept=".json" hidden onchange="cargarFavs(event, 'grp')"><IconFolderOpen class="app-icon" /> Cargar JSON</label>
+            <input type="file" id="file-fav-grp" accept=".json" style="display:none;" aria-label="Cargar favoritos grupales desde JSON" onchange="cargarFavs(event, 'grp')">
+            <button class="btn-secondary btn-full" type="button" onclick="document.getElementById('file-fav-grp').click()">
+              <IconFolderOpen class="app-icon" /> Cargar JSON
+            </button>
             <button class="btn-main" style="margin-top: 10px;" onclick="verFavoritos('grp')"><IconEye class="app-icon" style="color:white;" /> Ver</button>
             <button class="btn-secondary btn-full" style="margin-top: 10px;" onclick="descargarFavs('grp')"><IconDownload class="app-icon" /> Descargar</button>
           </div>

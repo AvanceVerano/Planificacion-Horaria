@@ -1,3 +1,11 @@
+// --- INLINE SVG ICONS (Lucide, stroke-width 1.5) ---
+const SVG_CHECK   = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg>`;
+const SVG_EYE     = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+const SVG_PLUS    = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
+const SVG_STAR_ON = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+const SVG_STAR_OFF= `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+const SVG_FOLDER  = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`;
+
 // --- VARIABLES GLOBALES ---
 const startHour = 7, endHour = 23;
 const totalMinutes = (endHour - startHour) * 60;
@@ -447,15 +455,15 @@ function actualizarBandejaInteractiva() {
         
         if (seccionAsignada) {
             container.innerHTML += `
-                <div style="background: #27ae60; color: white; padding: 8px 15px; border-radius: 20px; font-size: 14px; display: flex; align-items: center; gap: 8px;">
-                    ✅ ${curso} (${seccionAsignada.seccion})
-                    <button onclick="quitarSeccionInteractiva('${curso}')" style="background: none; border: none; color: white; cursor: pointer; font-weight: bold;">X</button>
+                <div style="background: var(--primary); color: white; padding: 8px 15px; border-radius: var(--radius-pill, 999px); font-size: 14px; display: flex; align-items: center; gap: 8px; font-family: 'Public Sans', sans-serif; font-weight: 600;">
+                    ${SVG_CHECK} ${curso} (${seccionAsignada.seccion})
+                    <button onclick="quitarSeccionInteractiva('${curso}')" style="background: none; border: none; color: white; cursor: pointer; font-weight: bold; display: flex; align-items: center;">✕</button>
                 </div>`;
         } else {
             // Si el curso es el que estamos previsualizando, lo pintamos oscuro
             const isPreview = (curso === cursoPreviewActual);
-            const btnStyle = isPreview ? 'background-color: #34495e; color: white;' : '';
-            const btnText = isPreview ? `👀 Viendo ${curso}` : `➕ Asignar ${curso}`;
+            const btnStyle = isPreview ? 'background-color: var(--icon, #4A3B33); color: white;' : '';
+            const btnText = isPreview ? `${SVG_EYE} Viendo ${curso}` : `${SVG_PLUS} Asignar ${curso}`;
 
             container.innerHTML += `
                 <button class="btn-secondary" style="border-radius: 20px; ${btnStyle}" onclick="mostrarOpcionesSecciones('${curso}')">
@@ -753,7 +761,7 @@ function generarTarjetasAlumnos() {
                      ondrop="dropStudentFiles(event, ${i})" 
                      onclick="document.getElementById('file-input-grp-${i}').click()">
                     
-                    <p style="margin: 0; color: var(--primary); font-weight: bold;">📂 Clic o Arrastra JSONs</p>
+                    <p style="margin: 0; color: var(--primary); font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Public Sans', sans-serif;">${SVG_FOLDER} Clic o Arrastra JSONs</p>
                     <small style="color: #7f8c8d; margin-top: 5px;">Archivos de este alumno</small>
                     <input type="file" id="file-input-grp-${i}" multiple accept=".json" style="display:none;" onchange="readStudentFiles(event, ${i})">
                 </div>`;
@@ -1035,8 +1043,8 @@ function actualizarBotonFavorito() {
     const targetArr = isGroupMode ? favsGrp : favsInd;
     const isFav = targetArr.some(f => JSON.stringify(f) === JSON.stringify(schedulesList[currentIndex]));
     const btn = document.getElementById('btn-fav');
-    if (isFav) { btn.innerHTML = '⭐ Guardado'; btn.classList.add('active'); } 
-    else { btn.innerHTML = '☆ Favorito'; btn.classList.remove('active'); }
+    if (isFav) { btn.innerHTML = `${SVG_STAR_ON} Guardado`; btn.classList.add('active'); } 
+    else { btn.innerHTML = `${SVG_STAR_OFF} Favorito`; btn.classList.remove('active'); }
 }
 
 function descargarFavs(tipo) {
