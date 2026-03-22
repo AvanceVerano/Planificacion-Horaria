@@ -5,50 +5,94 @@ namespace HorariosPro.Api.Services;
 
 public class HorarioGenerator
 {
-    public List<HorarioResultadoDto> GenerarIndividual(IEnumerable<Curso> cursos, ScheduleFilters filters, Dictionary<string, BloqueoDiaDto>? bloqueos)
+    /// <summary>
+    /// Generates all valid individual schedules using Backtracking + Bitmask collision detection.
+    ///
+    /// Strategy:
+    ///   1. Pre-compute int[6] bitmasks for each candidate section and for the user's blocks.
+    ///   2. Pre-filter sections that conflict with sede rules or user blocks (O(1) via bitmask AND).
+    ///   3. Order courses by fewest valid sections (fail-fast heuristic).
+    ///   4. DFS with a running mascaraActual[6] accumulator:
+    ///        - Push : mascaraActual[d] |= seccion.Mascaras[d]   (Bitwise OR)
+    ///        - Check: (mascaraActual[d] &amp; seccion.Mascaras[d]) != 0  → collision
+    ///        - Pop  : mascaraActual[d] &amp;= ~seccion.Mascaras[d]  (Bitwise AND NOT)
+    /// </summary>
+    public List<HorarioResultadoDto> GenerarIndividual(
+        IEnumerable<Curso> cursos,
+        ScheduleFilters filters,
+        Dictionary<string, BloqueoDiaDto>? bloqueos)
     {
         var cursosList = cursos.ToList();
-        
-        // Filtramos las secciones válidas ANTES de buscar combinaciones (súper rápido)
+
+        // Pre-compute the block bitmask once for all candidate evaluations.
+        var mascaraBloqueos = BitmaskHelper.BloqueosToBitmasks(bloqueos);
+
+        // Pre-compute section bitmasks and filter out invalid sections.
         var cursoSecciones = cursosList.ToDictionary(
             curso => curso.Nombre,
-            curso => curso.Secciones.Where(seccion => filters.Permite(seccion) && SeccionCumpleBloqueos(seccion, bloqueos)).ToList(),
+            curso => curso.Secciones
+                .Select(sec => new SectionWithMask(curso.Nombre, sec, BitmaskHelper.SeccionToBitmasks(sec)))
+                .Where(sw => filters.Permite(sw.Seccion)
+                          && !BitmaskHelper.ChocaConMascara(sw.Mascaras, mascaraBloqueos))
+                .ToList(),
             StringComparer.OrdinalIgnoreCase);
 
+        // Order by fewest options first (fail-fast).
         var ordenCursos = cursosList
             .OrderBy(curso => cursoSecciones.TryGetValue(curso.Nombre, out var s) ? s.Count : 0)
             .Select(curso => curso.Nombre)
             .ToList();
 
         var resultados = new List<HorarioResultadoDto>();
-        var actual = new List<SectionCandidate>();
+        var actual     = new List<SectionWithMask>();
 
-        BuscarIndividual(ordenCursos, cursoSecciones, 0, actual, resultados);
+        // mascaraActual[d] accumulates the bits of all sections added so far on day d.
+        var mascaraActual = new int[6];
+
+        BuscarIndividual(ordenCursos, cursoSecciones, mascaraBloqueos, 0, actual, mascaraActual, resultados);
 
         return resultados;
     }
 
-    public List<HorarioResultadoDto> GenerarGrupal(IEnumerable<Curso> cursos, List<EstudiantePlan> estudiantes, ScheduleFilters filters)
+    /// <summary>
+    /// Generates all valid group schedules ensuring each student's personal blocks and
+    /// cross-student section compatibility are respected, using Bitmask collision detection.
+    /// </summary>
+    public List<HorarioResultadoDto> GenerarGrupal(
+        IEnumerable<Curso> cursos,
+        List<EstudiantePlan> estudiantes,
+        ScheduleFilters filters)
     {
         var cursosList = cursos.ToList();
-        var cursoSecciones = new Dictionary<string, List<Seccion>>(StringComparer.OrdinalIgnoreCase);
 
-        // Pre-filtrado inteligente: Si a un estudiante no le sirve la sección por sus bloqueos, la descartamos
+        // Pre-compute per-student block bitmasks.
+        var mascarasBloqueosPorEstudiante = estudiantes
+            .Select(e => BitmaskHelper.BloqueosToBitmasks(e.Bloqueos))
+            .ToArray();
+
+        // Pre-compute section bitmasks, filtering by sede and every student's blocks.
+        var cursoSecciones = new Dictionary<string, List<SectionWithMask>>(StringComparer.OrdinalIgnoreCase);
         foreach (var curso in cursosList)
         {
-            var estudiantesDelCurso = estudiantes.Where(e => e.Cursos.Contains(curso.Nombre)).ToList();
-            var seccionesValidas = curso.Secciones.Where(seccion =>
-            {
-                if (!filters.Permite(seccion)) return false;
-                
-                foreach (var estudiante in estudiantesDelCurso)
-                {
-                    if (!SeccionCumpleBloqueos(seccion, estudiante.Bloqueos)) return false;
-                }
-                return true;
-            }).ToList();
+            // Indices of students who share this course.
+            var idxEstudiantesDelCurso = estudiantes
+                .Select((e, i) => (Estudiante: e, Indice: i))
+                .Where(x => x.Estudiante.Cursos.Contains(curso.Nombre))
+                .Select(x => x.Indice)
+                .ToArray();
 
-            cursoSecciones[curso.Nombre] = seccionesValidas;
+            cursoSecciones[curso.Nombre] = curso.Secciones
+                .Select(sec => new SectionWithMask(curso.Nombre, sec, BitmaskHelper.SeccionToBitmasks(sec)))
+                .Where(sw =>
+                {
+                    if (!filters.Permite(sw.Seccion)) return false;
+                    // Discard if any student who shares this course has a block conflict.
+                    foreach (var idx in idxEstudiantesDelCurso)
+                        if (BitmaskHelper.ChocaConMascara(sw.Mascaras, mascarasBloqueosPorEstudiante[idx]))
+                            return false;
+                    return true;
+                })
+                .ToList();
         }
 
         var cursosOrdenados = cursosList
@@ -57,47 +101,28 @@ public class HorarioGenerator
             .ToList();
 
         var resultados = new List<HorarioResultadoDto>();
-        var actual = new List<SectionCandidate>();
+        var actual     = new List<SectionWithMask>();
 
-        BuscarGrupal(cursosOrdenados, cursoSecciones, estudiantes, 0, actual, resultados);
+        // mascarasPorEstudiante[i][d] = accumulated bitmask for student i on day d.
+        var mascarasPorEstudiante = estudiantes.Select(_ => new int[6]).ToArray();
+
+        BuscarGrupal(cursosOrdenados, cursoSecciones, estudiantes, mascarasBloqueosPorEstudiante,
+                     0, actual, mascarasPorEstudiante, resultados);
 
         return resultados;
     }
 
-    // --- NUEVA LÓGICA DE VALIDACIÓN DE BLOQUEOS ---
-    private static bool SeccionCumpleBloqueos(Seccion seccion, Dictionary<string, BloqueoDiaDto>? bloqueos)
-    {
-        if (bloqueos == null || bloqueos.Count == 0) return true;
-
-        foreach (var sesion in seccion.Sesiones)
-        {
-            if (!bloqueos.TryGetValue(sesion.Dia, out var bloqueoDia)) continue;
-
-            if (bloqueoDia.DiaLibre) return false;
-
-            if (bloqueoDia.Rangos != null && bloqueoDia.Rangos.Count > 0)
-            {
-                int inicioSesion = (int)sesion.HoraInicio.TotalMinutes;
-                int finSesion = (int)sesion.HoraFin.TotalMinutes;
-
-                foreach (var rango in bloqueoDia.Rangos)
-                {
-                    // Lógica de colisión en minutos
-                    if (Math.Max(inicioSesion, rango.Min) < Math.Min(finSesion, rango.Max))
-                    {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
-    }
+    // -------------------------------------------------------------------------
+    //  DFS — Individual
+    // -------------------------------------------------------------------------
 
     private static void BuscarIndividual(
         IReadOnlyList<string> cursos,
-        IReadOnlyDictionary<string, List<Seccion>> cursoSecciones,
+        IReadOnlyDictionary<string, List<SectionWithMask>> cursoSecciones,
+        int[] mascaraBloqueos,
         int indice,
-        List<SectionCandidate> actual,
+        List<SectionWithMask> actual,
+        int[] mascaraActual,
         List<HorarioResultadoDto> resultados)
     {
         if (indice == cursos.Count)
@@ -109,23 +134,39 @@ public class HorarioGenerator
         var curso = cursos[indice];
         if (!cursoSecciones.TryGetValue(curso, out var secciones) || secciones.Count == 0) return;
 
-        foreach (var seccion in secciones)
+        foreach (var sw in secciones)
         {
-            var candidato = new SectionCandidate(curso, seccion);
-            if (TieneColision(candidato, actual)) continue;
+            // Validación 1 — ¿Choca con el horario ya armado? (O(1) Bitwise AND)
+            if (BitmaskHelper.ChocaConMascara(sw.Mascaras, mascaraActual)) continue;
 
-            actual.Add(candidato);
-            BuscarIndividual(cursos, cursoSecciones, indice + 1, actual, resultados);
+            // Validación 2 — ¿Choca con los bloqueos del usuario? (O(1) Bitwise AND)
+            // Note: sections were already pre-filtered above; this is a safety guard.
+            if (BitmaskHelper.ChocaConMascara(sw.Mascaras, mascaraBloqueos)) continue;
+
+            // Push: add the section's bits to the running accumulator with Bitwise OR.
+            for (int d = 0; d < 6; d++) mascaraActual[d] |= sw.Mascaras[d];
+            actual.Add(sw);
+
+            BuscarIndividual(cursos, cursoSecciones, mascaraBloqueos, indice + 1, actual, mascaraActual, resultados);
+
+            // Pop: undo the OR by clearing only the section's bits with Bitwise AND NOT.
             actual.RemoveAt(actual.Count - 1);
+            for (int d = 0; d < 6; d++) mascaraActual[d] &= ~sw.Mascaras[d];
         }
     }
+
+    // -------------------------------------------------------------------------
+    //  DFS — Grupal
+    // -------------------------------------------------------------------------
 
     private static void BuscarGrupal(
         IReadOnlyList<string> cursos,
-        IReadOnlyDictionary<string, List<Seccion>> cursoSecciones,
+        IReadOnlyDictionary<string, List<SectionWithMask>> cursoSecciones,
         IReadOnlyList<EstudiantePlan> estudiantes,
+        int[][] mascarasBloqueosPorEstudiante,
         int indice,
-        List<SectionCandidate> actual,
+        List<SectionWithMask> actual,
+        int[][] mascarasPorEstudiante,
         List<HorarioResultadoDto> resultados)
     {
         if (indice == cursos.Count)
@@ -137,67 +178,66 @@ public class HorarioGenerator
         var curso = cursos[indice];
         if (!cursoSecciones.TryGetValue(curso, out var secciones) || secciones.Count == 0) return;
 
-        foreach (var seccion in secciones)
+        // Pre-compute the student indices that share this course (avoids repeated LINQ in the loop).
+        var idxEstudiantesDelCurso = estudiantes
+            .Select((e, i) => (Estudiante: e, Indice: i))
+            .Where(x => x.Estudiante.Cursos.Contains(curso))
+            .Select(x => x.Indice)
+            .ToArray();
+
+        foreach (var sw in secciones)
         {
-            var candidato = new SectionCandidate(curso, seccion);
-            if (!EsCompatibleConEstudiantes(candidato, actual, estudiantes)) continue;
-
-            actual.Add(candidato);
-            BuscarGrupal(cursos, cursoSecciones, estudiantes, indice + 1, actual, resultados);
-            actual.RemoveAt(actual.Count - 1);
-        }
-    }
-
-    private static bool EsCompatibleConEstudiantes(SectionCandidate candidato, List<SectionCandidate> actual, IReadOnlyList<EstudiantePlan> estudiantes)
-    {
-        foreach (var estudiante in estudiantes)
-        {
-            if (!estudiante.Cursos.Contains(candidato.Curso)) continue;
-
-            var personal = actual
-                .Where(item => estudiante.Cursos.Contains(item.Curso))
-                .ToList();
-
-            if (TieneColision(candidato, personal)) return false;
-        }
-        return true;
-    }
-
-    private static bool TieneColision(SectionCandidate candidato, List<SectionCandidate> actual)
-    {
-        foreach (var existente in actual)
-        {
-            foreach (var sesionActual in existente.Seccion.Sesiones)
+            // Check each student who shares this course for collisions in their personal schedule.
+            bool esValida = true;
+            foreach (var idx in idxEstudiantesDelCurso)
             {
-                foreach (var sesionNueva in candidato.Seccion.Sesiones)
+                // Validación 1 — ¿Choca con el horario ya armado del alumno? (O(1))
+                if (BitmaskHelper.ChocaConMascara(sw.Mascaras, mascarasPorEstudiante[idx]))
                 {
-                    if (EsColision(sesionActual, sesionNueva)) return true;
+                    esValida = false;
+                    break;
+                }
+
+                // Validación 2 — ¿Choca con los bloqueos personales del alumno? (O(1))
+                // Safety guard; sections were pre-filtered but this makes intent explicit.
+                if (BitmaskHelper.ChocaConMascara(sw.Mascaras, mascarasBloqueosPorEstudiante[idx]))
+                {
+                    esValida = false;
+                    break;
                 }
             }
+            if (!esValida) continue;
+
+            // Push: Bitwise OR into every sharing student's accumulator.
+            foreach (var idx in idxEstudiantesDelCurso)
+                for (int d = 0; d < 6; d++) mascarasPorEstudiante[idx][d] |= sw.Mascaras[d];
+            actual.Add(sw);
+
+            BuscarGrupal(cursos, cursoSecciones, estudiantes, mascarasBloqueosPorEstudiante,
+                         indice + 1, actual, mascarasPorEstudiante, resultados);
+
+            // Pop: Bitwise AND NOT to undo the OR for each sharing student.
+            actual.RemoveAt(actual.Count - 1);
+            foreach (var idx in idxEstudiantesDelCurso)
+                for (int d = 0; d < 6; d++) mascarasPorEstudiante[idx][d] &= ~sw.Mascaras[d];
         }
-        return false;
     }
 
-    private static bool EsColision(Sesion a, Sesion b)
-    {
-        if (!string.Equals(a.Dia, b.Dia, StringComparison.OrdinalIgnoreCase)) return false;
+    // -------------------------------------------------------------------------
+    //  Result builder
+    // -------------------------------------------------------------------------
 
-        var inicio = a.HoraInicio > b.HoraInicio ? a.HoraInicio : b.HoraInicio;
-        var fin = a.HoraFin < b.HoraFin ? a.HoraFin : b.HoraFin;
-        return inicio < fin;
-    }
-
-    private static HorarioResultadoDto BuildResultado(List<SectionCandidate> actual)
+    private static HorarioResultadoDto BuildResultado(List<SectionWithMask> actual)
     {
-        var items = actual.Select(item => new HorarioItemDto(
-                item.Seccion.CursoId,
-                item.Curso,
+        var items = actual.Select(sw => new HorarioItemDto(
+                sw.Seccion.CursoId,
+                sw.Curso,
                 new SeccionDto(
-                    item.Seccion.Id,
-                    item.Seccion.Codigo,
-                    item.Seccion.Sede,
-                    item.Seccion.Profesor,
-                    item.Seccion.Sesiones
+                    sw.Seccion.Id,
+                    sw.Seccion.Codigo,
+                    sw.Seccion.Sede,
+                    sw.Seccion.Profesor,
+                    sw.Seccion.Sesiones
                         .Select(sesion => new SesionDto(
                             sesion.Dia,
                             TimeParser.ToDisplay(sesion.HoraInicio),
@@ -208,7 +248,11 @@ public class HorarioGenerator
         return new HorarioResultadoDto(items);
     }
 
-    // Filtros limpios, ya que los bloqueos ahora son manejados aparte
+    // -------------------------------------------------------------------------
+    //  Supporting types
+    // -------------------------------------------------------------------------
+
+    /// <summary>Filters schedule candidates by allowed campus locations.</summary>
     public sealed record ScheduleFilters(HashSet<string> Sedes)
     {
         public bool Permite(Seccion seccion)
@@ -218,8 +262,12 @@ public class HorarioGenerator
         }
     }
 
-    // Le agregamos la propiedad de Bloqueos al estudiante
-    public sealed record EstudiantePlan(string Nombre, HashSet<string> Cursos, Dictionary<string, BloqueoDiaDto>? Bloqueos);
+    /// <summary>A student's name, course set, and personal time blocks.</summary>
+    public sealed record EstudiantePlan(
+        string Nombre,
+        HashSet<string> Cursos,
+        Dictionary<string, BloqueoDiaDto>? Bloqueos);
 
-    private sealed record SectionCandidate(string Curso, Seccion Seccion);
+    /// <summary>A section together with its pre-computed bitmask (one int per day).</summary>
+    private sealed record SectionWithMask(string Curso, Seccion Seccion, int[] Mascaras);
 }
