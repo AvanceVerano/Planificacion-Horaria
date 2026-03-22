@@ -184,7 +184,31 @@
 
             <button class="btn-secondary btn-full" onclick="agregarSeccionEnBlanco()">+ Agregar Nueva Sección</button>
             <br>
-            <button class="btn-main" onclick="descargarJSON()">💾 Guardar y Descargar JSON</button>
+
+            <div class="builder-section-publica">
+                <h3>📤 Contribuidores</h3>
+                <p style="font-size:13px; color:#7f8c8d; margin-bottom:10px;">Descarga el JSON o envíalo por correo para que un administrador lo revise.</p>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button class="btn-main" onclick="descargarJSON()">💾 Descargar JSON</button>
+                    <button class="btn-secondary" onclick="enviarPorCorreo()">✉️ Enviar para Revisión (Correo)</button>
+                </div>
+            </div>
+
+            <div class="builder-section-privada">
+                <h3>🔒 Administradores</h3>
+                <p style="font-size:13px; color:#7f8c8d; margin-bottom:10px;">Acceso exclusivo para administradores del sistema.</p>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                    <input type="password" id="admin-password-input" class="modern-input" placeholder="Clave de Admin" style="flex:1; min-width:180px;">
+                    <button class="btn-secondary" onclick="validarYMostrarPanelAdmin()">🔑 Validar y Mostrar Panel Admin</button>
+                </div>
+                <div id="admin-panel" style="display:none; margin-top:15px;">
+                    <label class="btn-secondary" style="cursor:pointer;">
+                        📂 Subir JSON Oficial a BD
+                        <input type="file" id="admin-upload-json" accept=".json" style="display:none;" onchange="subirJsonOficial(event)">
+                    </label>
+                    <div id="admin-upload-status" style="margin-top:8px; font-size:13px;"></div>
+                </div>
+            </div>
         </div>
     </div>
 

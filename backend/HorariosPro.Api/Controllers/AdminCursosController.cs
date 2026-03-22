@@ -1,5 +1,6 @@
 using HorariosPro.Api.Contracts;
 using HorariosPro.Api.Data;
+using HorariosPro.Api.Filters;
 using HorariosPro.Api.Models;
 using HorariosPro.Api.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -101,4 +102,77 @@ public class AdminCursosController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpGet("validate")]
+    [AdminAuth]
+    public IActionResult Validate() => Ok();
+
+    [HttpPost("upload-json")]
+    [AdminAuth]
+    public async Task<ActionResult<CursoDto>> UploadJson([FromBody] CursoUploadRequest request, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(request.Nombre))
+        {
+            return BadRequest("El nombre del curso es obligatorio.");
+        }
+
+        if (request.Secciones is null || request.Secciones.Count == 0)
+        {
+            return BadRequest("El curso debe tener al menos una sección.");
+        }
+
+        await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+        var curso = new Curso { Nombre = request.Nombre.Trim() };
+        _dbContext.Cursos.Add(curso);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        foreach (var seccionDto in request.Secciones)
+        {
+            if (string.IsNullOrWhiteSpace(seccionDto.Seccion))
+            {
+                return BadRequest("Todas las secciones deben tener un código.");
+            }
+
+            var seccion = new Seccion
+            {
+                CursoId = curso.Id,
+                Codigo = seccionDto.Seccion.Trim(),
+                Sede = (seccionDto.Sede ?? string.Empty).Trim(),
+                Profesor = (seccionDto.Profesor ?? string.Empty).Trim()
+            };
+            _dbContext.Secciones.Add(seccion);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            foreach (var sesionDto in seccionDto.Sesiones ?? [])
+            {
+                if (!TimeParser.TryParse(sesionDto.Inicio, out var horaInicio) ||
+                    !TimeParser.TryParse(sesionDto.Fin, out var horaFin))
+                {
+                    return BadRequest($"Formato de hora inválido en sección '{seccionDto.Seccion}': '{sesionDto.Inicio}' - '{sesionDto.Fin}'.");
+                }
+
+                _dbContext.Sesiones.Add(new Sesion
+                {
+                    SeccionId = seccion.Id,
+                    Dia = sesionDto.Dia.Trim(),
+                    HoraInicio = horaInicio,
+                    HoraFin = horaFin
+                });
+            }
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+
+        await transaction.CommitAsync(cancellationToken);
+
+        var cursoConRelaciones = await _dbContext.Cursos
+            .AsNoTracking()
+            .Include(c => c.Secciones)
+            .ThenInclude(s => s.Sesiones)
+            .FirstAsync(c => c.Id == curso.Id, cancellationToken);
+
+        return CreatedAtAction(nameof(GetCurso), new { id = curso.Id }, DtoMapper.ToDto(cursoConRelaciones));
+    }
 }
+

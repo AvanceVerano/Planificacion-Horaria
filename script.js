@@ -9,6 +9,7 @@ let catalogoCursos = [];
 let origenDatosInd = 'ninguno';
 let origenDatosGrp = 'ninguno';
 const API_BASE_URL = 'http://localhost:5067';
+const ADMIN_EMAIL = 'admin@horariospro.com';
 
 // Estado del Calendario Actual
 let schedulesList = [];
@@ -1347,4 +1348,99 @@ function descargarJSON() {
     a.click();
     
     URL.revokeObjectURL(url);
+    return nombreCurso;
+}
+
+function enviarPorCorreo() {
+    const nombreCurso = descargarJSON();
+    if (!nombreCurso) return;
+    const asunto = encodeURIComponent('Nuevo Curso para Horarios Pro');
+    const cuerpo = encodeURIComponent('Adjunto el JSON de mi curso. Pruebas de que funciona: [Escribe aquí]');
+    window.location.href = `mailto:${ADMIN_EMAIL}?subject=${asunto}&body=${cuerpo}`;
+}
+
+async function hashSHA256(texto) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(texto);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function validarYMostrarPanelAdmin() {
+    const password = document.getElementById('admin-password-input').value;
+    if (!password) { alert('Ingresa la clave de administrador.'); return; }
+
+    const statusEl = document.getElementById('admin-upload-status');
+    statusEl.textContent = '⏳ Validando clave...';
+
+    try {
+        const token = await hashSHA256(password);
+        const respuesta = await fetch(`${API_BASE_URL}/api/admin/cursos/validate`, {
+            method: 'GET',
+            headers: { 'X-Admin-Token': token }
+        });
+
+        if (respuesta.status === 401) {
+            statusEl.textContent = '❌ Clave incorrecta.';
+            document.getElementById('admin-panel').style.display = 'none';
+            return;
+        }
+        if (!respuesta.ok) {
+            statusEl.textContent = '❌ Error al validar la clave.';
+            return;
+        }
+
+        document.getElementById('admin-panel').style.display = 'block';
+        statusEl.textContent = '✅ Clave válida. Puedes subir el JSON oficial.';
+    } catch (err) {
+        statusEl.textContent = `❌ Error de conexión: ${err.message}`;
+    }
+}
+
+async function subirJsonOficial(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const statusEl = document.getElementById('admin-upload-status');
+    const password = document.getElementById('admin-password-input').value;
+    if (!password) { alert('Ingresa la clave de administrador antes de subir.'); return; }
+
+    const nombreCurso = document.getElementById('builder-course-name').value.trim() || file.name.replace('.json', '');
+
+    try {
+        statusEl.textContent = '⏳ Procesando...';
+        const token = await hashSHA256(password);
+        const contenido = await file.text();
+        const secciones = JSON.parse(contenido);
+
+        const payload = { nombre: nombreCurso, secciones };
+
+        const respuesta = await fetch(`${API_BASE_URL}/api/admin/cursos/upload-json`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Admin-Token': token
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (respuesta.status === 401) {
+            statusEl.textContent = '❌ Acceso denegado: clave incorrecta.';
+            return;
+        }
+        if (!respuesta.ok) {
+            const error = await respuesta.text();
+            statusEl.textContent = `❌ Error del servidor: ${error}`;
+            return;
+        }
+
+        const resultado = await respuesta.json();
+        statusEl.textContent = `✅ Curso "${resultado.nombre}" subido correctamente (ID: ${resultado.id}).`;
+        await cargarCursosServidor();
+    } catch (err) {
+        statusEl.textContent = `❌ Error: ${err.message}`;
+    } finally {
+        event.target.value = '';
+    }
 }

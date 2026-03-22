@@ -840,3 +840,24 @@ select:focus {
 .btn-add-rango:hover {
     background: #bdc3c7;
 }
+/* BUILDER SECTIONS: Pública / Privada */
+.builder-section-publica,
+.builder-section-privada {
+    margin-top: 20px;
+    padding: 18px 20px;
+    border-radius: 10px;
+    background: #ffffff;
+    border: 1px solid #e1e8ed;
+}
+.builder-section-publica {
+    border-left: 4px solid #4A90E2;
+}
+.builder-section-privada {
+    border-left: 4px solid #E74C3C;
+}
+.builder-section-publica h3,
+.builder-section-privada h3 {
+    margin: 0 0 6px 0;
+    font-size: 15px;
+    color: #2c3e50;
+}
