@@ -183,6 +183,71 @@ function seccionCumpleFiltros(sec, bloqueos) {
     return true;
 }
 
+// --- UTILIDADES DE BITMASK ---
+// Día empieza a las 7:00 (Bit 0) y termina a las 23:00 (Bit 15).
+// Cada bit representa 1 hora. Ej.: 8:00–10:00 enciende los bits 1 y 2.
+const DIA_A_INDICE      = { 'Lun': 0, 'Mar': 1, 'Mie': 2, 'Jue': 3, 'Vie': 4, 'Sab': 5 };
+const HORA_BASE_BITS    = 7;   // El Bit 0 corresponde a las 7:00
+const BITS_POR_DIA      = 16;  // Los bits 0–15 cubren las horas 7:00–23:00
+
+/**
+ * Convierte un rango de tiempo (en minutos desde medianoche) a una máscara de bits.
+ * Fórmula: startBit = floor(inicioMin/60) - 7,  endBit = ceil(finMin/60) - 7.
+ * Ej.: inicioMin=480 (8:00), finMin=600 (10:00) → bits 1 y 2.
+ */
+function minutosARangoBits(inicioMin, finMin) {
+    const startBit = Math.max(0, Math.floor(inicioMin / 60) - HORA_BASE_BITS);
+    const endBit   = Math.min(BITS_POR_DIA, Math.ceil(finMin / 60) - HORA_BASE_BITS);
+    if (startBit >= endBit) return 0;
+    return ((1 << (endBit - startBit)) - 1) << startBit;
+}
+
+/**
+ * Convierte las sesiones de una sección en un arreglo int[6] de máscaras (0=Lun…5=Sab).
+ * Las horas de las sesiones son strings "h:mmam/pm" (p.ej. "8:00am"), manejados por parseTime().
+ */
+function seccionToBitmasks(sec) {
+    const mascaras = [0, 0, 0, 0, 0, 0];
+    for (const ses of (sec.sesiones || [])) {
+        const diaIdx = DIA_A_INDICE[ses.dia];
+        if (diaIdx === undefined) continue;
+        mascaras[diaIdx] |= minutosARangoBits(parseTime(ses.inicio), parseTime(ses.fin));
+    }
+    return mascaras;
+}
+
+/**
+ * Pre-computa las máscaras de bloqueo del usuario en un arreglo int[6].
+ * Los rangos en el objeto bloqueo están en minutos desde medianoche (de parseTimeInputToMinutes).
+ */
+function bloqueosToBitmasks(bloqueos) {
+    const mascaras = [0, 0, 0, 0, 0, 0];
+    for (const [dia, bloqueoDia] of Object.entries(bloqueos || {})) {
+        const diaIdx = DIA_A_INDICE[dia];
+        if (diaIdx === undefined) continue;
+        if (bloqueoDia.diaLibre) {
+            // Bloquear todas las ranuras horarias del día.
+            mascaras[diaIdx] = (1 << BITS_POR_DIA) - 1;
+            continue;
+        }
+        for (const rango of (bloqueoDia.rangos || [])) {
+            mascaras[diaIdx] |= minutosARangoBits(rango.min, rango.max);
+        }
+    }
+    return mascaras;
+}
+
+/**
+ * Devuelve true si mascarasA y mascarasB comparten al menos un bit en cualquier día
+ * (es decir, existe una colisión de horario).
+ */
+function chocaConMascaras(mascarasA, mascarasB) {
+    for (let d = 0; d < 6; d++) {
+        if ((mascarasA[d] & mascarasB[d]) !== 0) return true;
+    }
+    return false;
+}
+
 // Inicializar la UI al cargar
 document.addEventListener('DOMContentLoaded', () => {
     renderFiltrosBloqueo('filtros-ind-container', 'ind');
@@ -302,71 +367,6 @@ async function procesarArchivosInd(event) {
     renderCatalogoIndividual();
 }
 
-async function iniciarGeneracionInd() {
-    const cursosReq = Array.from(document.querySelectorAll('.chk-curso:checked')).map(cb => cb.value);
-    const sedesReq = Array.from(document.querySelectorAll('.chk-sede:checked')).map(cb => cb.value);
-    const bloqueosInd = leerBloqueos('ind');
-    horariosInd = [];
-    document.getElementById('error-msg').innerText = '';
-
-    if (cursosReq.length === 0) {
-        document.getElementById('error-msg').innerText = 'Selecciona al menos un curso.';
-        return;
-    }
-
-    if (origenDatosInd === 'api' && catalogoDisponible) {
-        const horariosApi = await solicitarHorariosIndividualApi(cursosReq, sedesReq);
-        if (!horariosApi) return;
-
-        horariosInd = horariosApi.filter(schedule =>
-            schedule.every(sec => seccionCumpleFiltros(sec, bloqueosInd))
-        );
-        if (horariosInd.length === 0) {
-            document.getElementById('error-msg').innerText = "No se encontró ninguna combinación posible. Intenta quitar cursos que se crucen o selecciona más sedes.";
-            return;
-        }
-
-        isGroupMode = false;
-        schedulesList = horariosInd;
-        prepararCalendario('Individuales', 'screen-setup');
-        cambiarPantalla('screen-calendar');
-        return;
-    }
-    
-    function choca(horario, nuevaSec) {
-        return horario.some(sec => sec.sesiones.some(s1 => nuevaSec.sesiones.some(s2 => hayColision(s1, s2))));
-    }
-
-    function buscar(idx, actual) {
-        if (idx === cursosReq.length) { horariosInd.push([...actual]); return; }
-        let curso = cursosReq[idx];
-        for (let sec of (cursosDataInd[curso] || [])) {
-            if (!sedesReq.includes(sec.sede)) continue;
-            if (!seccionCumpleFiltros(sec, bloqueosInd)) continue;
-            if (!choca(actual, sec)) {
-                actual.push({ ...sec, curso: curso });
-                buscar(idx + 1, actual);
-                actual.pop();
-            }
-        }
-    }
-    
-    // 1. Ejecutar la búsqueda UNA SOLA VEZ
-    buscar(0, []);
-    
-    // 2. Validar resultados vacíos
-    if (horariosInd.length === 0) {
-        document.getElementById('error-msg').innerText = "No se encontró ninguna combinación posible. Intenta quitar cursos que se crucen o selecciona más sedes.";
-        return; // Detiene el código, no cambia de pantalla
-    }
-
-    // 3. Mostrar el calendario
-    isGroupMode = false;
-    schedulesList = horariosInd;
-    prepararCalendario('Individuales', 'screen-setup');
-    cambiarPantalla('screen-calendar');
-}
-
 async function solicitarHorariosIndividualApi(cursosReq, sedesReq, bloqueosReq) {
     try {
         const response = await fetch(`${API_BASE_URL}/api/horarios/individual`, {
@@ -441,28 +441,49 @@ async function iniciarGeneracionInd() {
             return;
         }
         
-        // --- BÚSQUEDA LOCAL (Si usas JSON directamente) ---
-        function choca(horario, nuevaSec) {
-            return horario.some(sec => sec.sesiones.some(s1 => nuevaSec.sesiones.some(s2 => hayColision(s1, s2))));
+        // --- BÚSQUEDA LOCAL con Bitmask (Si usas JSON directamente) ---
+
+        // 1. Pre-computar la máscara de bloqueos del usuario una sola vez: O(días × rangos).
+        const mascaraBloqueos = bloqueosToBitmasks(bloqueosInd);
+
+        // 2. Pre-computar la máscara de cada sección candidata y descartar las inválidas.
+        //    Se filtran por sede y por la máscara de bloqueos (Validación O(1)).
+        const seccionesPorCurso = {};
+        for (const curso of cursosReq) {
+            seccionesPorCurso[curso] = (cursosDataInd[curso] || [])
+                .filter(sec => sedesReq.includes(sec.sede))
+                .map(sec => ({ ...sec, curso, _mascaras: seccionToBitmasks(sec) }))
+                .filter(sw => !chocaConMascaras(sw._mascaras, mascaraBloqueos));
         }
 
-        function buscar(idx, actual) {
+        // 3. Acumulador de bits del horario en construcción: int[6], uno por día.
+        //    Se mantiene sincronizado con `actual` en todo momento.
+        const mascaraActual = [0, 0, 0, 0, 0, 0];
+        const actual = [];
+
+        // 4. DFS con Bitmasking: cada verificación de colisión es O(6) = O(1).
+        function buscar(idx) {
             if (idx === cursosReq.length) { horariosInd.push([...actual]); return; }
-            let curso = cursosReq[idx];
-            for (let sec of (cursosDataInd[curso] || [])) {
-                if (!sedesReq.includes(sec.sede)) continue;
-                if (!seccionCumpleFiltros(sec, bloqueosInd)) continue;
-                if (!choca(actual, sec)) {
-                    actual.push({ ...sec, curso: curso });
-                    buscar(idx + 1, actual);
-                    actual.pop();
-                }
+            const curso = cursosReq[idx];
+            for (const sw of (seccionesPorCurso[curso] || [])) {
+                // Validación 1 — ¿Choca con el horario ya armado? (Bitwise AND)
+                if (chocaConMascaras(sw._mascaras, mascaraActual)) continue;
+
+                // Push: Bitwise OR para agregar la sección al acumulador.
+                for (let d = 0; d < 6; d++) mascaraActual[d] |= sw._mascaras[d];
+                actual.push(sw);
+
+                buscar(idx + 1);
+
+                // Pop: Bitwise AND NOT para deshacer el OR al retroceder.
+                actual.pop();
+                for (let d = 0; d < 6; d++) mascaraActual[d] &= ~sw._mascaras[d];
             }
         }
-        
-        // Damos un respiro de 50ms para que el navegador dibuje el botón de "Generando..."
+
+        // Respiro de 50ms para que el navegador dibuje el botón de "Generando..."
         await new Promise(resolve => setTimeout(resolve, 50));
-        buscar(0, []);
+        buscar(0);
         
         if (horariosInd.length === 0) {
             errorMsg.innerText = "No se encontró ninguna combinación posible.";
@@ -749,46 +770,63 @@ async function iniciarGeneracionGrupal() {
 
         let globalCourses = Array.from(globalCoursesSet);
 
-        function buscarGrp(idx, actualSchedule) {
+        // --- BÚSQUEDA GRUPAL con Bitmask ---
+
+        // 1. Pre-computar la máscara de bloqueos de cada alumno.
+        const mascaraBloqueosPorAlumno = groupStudents.map(stu => bloqueosToBitmasks(stu.bloqueos || {}));
+
+        // 2. Pre-computar la máscara de cada sección y descartar las que conflictúan con
+        //    la sede o con los bloqueos personales de cualquier alumno que lleve el curso.
+        const seccionesPorCursoGrp = {};
+        for (const courseName of globalCourses) {
+            const estudiantesDelCurso = groupStudents
+                .map((stu, i) => ({ stu, i }))
+                .filter(({ stu }) => stu.courses.includes(courseName));
+
+            seccionesPorCursoGrp[courseName] = (globalData[courseName] || [])
+                .filter(sec => sedesPermitidas.includes(sec.sede))
+                .map(sec => ({ ...sec, _mascaras: seccionToBitmasks(sec) }))
+                .filter(sw => estudiantesDelCurso.every(({ i }) =>
+                    !chocaConMascaras(sw._mascaras, mascaraBloqueosPorAlumno[i])));
+        }
+
+        // 3. Acumuladores de bits por alumno: mascarasPorAlumno[i][d].
+        const mascarasPorAlumno = groupStudents.map(() => [0, 0, 0, 0, 0, 0]);
+        const actualSchedule = [];
+
+        // 4. DFS con Bitmasking grupal: cada validación de colisión es O(6) = O(1).
+        function buscarGrp(idx) {
             if (idx === globalCourses.length) { horariosGrp.push([...actualSchedule]); return; }
 
-            let courseName = globalCourses[idx];
-            let sections = globalData[courseName] || [];
+            const courseName = globalCourses[idx];
 
-            for (let sec of sections) {
-                if (!sedesPermitidas.includes(sec.sede)) continue;
-                
-                // 2. APLICAMOS EL FILTRO INDIVIDUAL: ¿Le sirve esta sección a todos los que llevan el curso?
-                let cumpleBloqueos = true;
-                let isValidForAll = true;
+            // Alumnos que llevan este curso (calculado una vez por nivel de DFS).
+            const estudiantesDelCurso = groupStudents
+                .map((stu, i) => ({ stu, i }))
+                .filter(({ stu }) => stu.courses.includes(courseName));
 
-                for (let stu of groupStudents) {
-                    if (stu.courses.includes(courseName)) {
-                        // Verifica los bloqueos de tiempo del alumno
-                        if (!seccionCumpleFiltros(sec, stu.bloqueos)) {
-                            cumpleBloqueos = false;
-                            break;
-                        }
+            for (const sw of (seccionesPorCursoGrp[courseName] || [])) {
+                // Validación O(1): ¿Choca con el horario personal de algún alumno?
+                const esValida = estudiantesDelCurso.every(({ i }) =>
+                    !chocaConMascaras(sw._mascaras, mascarasPorAlumno[i])
+                );
+                if (!esValida) continue;
 
-                        // Verifica cruces con su horario ya armado
-                        let personalSchedule = actualSchedule.filter(s => stu.courses.includes(s.curso));
-                        let choca = personalSchedule.some(existente =>
-                            existente.sesiones.some(s1 => sec.sesiones.some(s2 => hayColision(s1, s2)))
-                        );
+                // Push: Bitwise OR en los acumuladores de todos los alumnos que llevan el curso.
+                for (const { i } of estudiantesDelCurso)
+                    for (let d = 0; d < 6; d++) mascarasPorAlumno[i][d] |= sw._mascaras[d];
+                actualSchedule.push({ ...sw, curso: courseName });
 
-                        if (choca) { isValidForAll = false; break; }
-                    }
-                }
+                buscarGrp(idx + 1);
 
-                if (cumpleBloqueos && isValidForAll) {
-                    actualSchedule.push({ ...sec, curso: courseName });
-                    buscarGrp(idx + 1, actualSchedule);
-                    actualSchedule.pop();
-                }
+                // Pop: Bitwise AND NOT para deshacer el OR al retroceder.
+                actualSchedule.pop();
+                for (const { i } of estudiantesDelCurso)
+                    for (let d = 0; d < 6; d++) mascarasPorAlumno[i][d] &= ~sw._mascaras[d];
             }
         }
 
-        buscarGrp(0, []);
+        buscarGrp(0);
     }
 
     if (horariosGrp.length === 0) {
