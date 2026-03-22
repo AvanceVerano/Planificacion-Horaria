@@ -609,6 +609,9 @@ input[type="text"]:focus {
 }
 
 .btn-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     background: var(--primary);
     color: white;
     border: none;
