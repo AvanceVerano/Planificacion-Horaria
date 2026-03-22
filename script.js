@@ -1357,11 +1357,18 @@ function descargarJSON() {
 }
 
 function enviarPorCorreo() {
-    const nombreCurso = descargarJSON();
-    if (!nombreCurso) return;
-    const asunto = encodeURIComponent('Nuevo Curso para Horarios Pro');
-    const cuerpo = encodeURIComponent('Adjunto el JSON de mi curso. Pruebas de que funciona: [Escribe aquí]');
-    window.location.href = `mailto:${ADMIN_EMAIL}?subject=${asunto}&body=${cuerpo}`;
+    // 1. Nos aseguramos de que el curso tenga nombre antes de enviar
+    const nombreCurso = document.getElementById('builder-course-name').value.trim() || "Nuevo_Curso";
+    
+    // 2. Preparamos los textos
+    const asunto = encodeURIComponent(`Aporte: Nuevo Curso para Horarios Pro - ${nombreCurso}`);
+    const cuerpo = encodeURIComponent(`¡Hola!\n\nAdjunto en este correo el archivo JSON que acabo de descargar para el curso "${nombreCurso}".\n\nPor favor, revísalo y súbelo a la base de datos principal.`);
+    
+    // 3. Abrimos el gestor de correo sin forzar una descarga simultánea
+    window.open(`mailto:${ADMIN_EMAIL}?subject=${asunto}&body=${cuerpo}`, '_self');
+    
+    // 4. Le avisamos al usuario que debe adjuntar el archivo manualmente
+    alert("Se ha abierto tu aplicación de correo. \n\n¡IMPORTANTE! No olvides ADJUNTAR el archivo .json que descargaste antes de enviar el correo.");
 }
 
 async function hashSHA256(texto) {
@@ -1374,32 +1381,59 @@ async function hashSHA256(texto) {
 
 async function validarYMostrarPanelAdmin() {
     const password = document.getElementById('admin-password-input').value;
-    if (!password) { alert('Ingresa la clave de administrador.'); return; }
-
     const statusEl = document.getElementById('admin-upload-status');
-    statusEl.textContent = '⏳ Validando clave...';
+    const panelAdmin = document.getElementById('admin-panel');
+    const panelLogin = document.getElementById('admin-login-section');
+
+    if (!password) { 
+        statusEl.textContent = '❌ Ingresa la clave de administrador.'; 
+        statusEl.style.color = '#e74c3c';
+        return; 
+    }
+
+    statusEl.textContent = '⏳ Validando clave con el servidor...';
+    statusEl.style.color = '#f39c12';
 
     try {
         const token = await hashSHA256(password);
-        const respuesta = await fetch(`${API_BASE_URL}/api/admin/cursos/validate`, {
+        
+        // ¡CAMBIO CLAVE! Usamos la ruta principal en lugar de /validate
+        const respuesta = await fetch(`${API_BASE_URL}/api/admin/cursos`, {
             method: 'GET',
             headers: { 'X-Admin-Token': token }
         });
 
         if (respuesta.status === 401) {
-            statusEl.textContent = '❌ Clave incorrecta.';
-            document.getElementById('admin-panel').style.display = 'none';
+            statusEl.textContent = '❌ Clave incorrecta. Acceso denegado.';
+            statusEl.style.color = '#e74c3c';
+            panelAdmin.style.display = 'none';
             return;
         }
+        
         if (!respuesta.ok) {
-            statusEl.textContent = '❌ Error al validar la clave.';
+            statusEl.textContent = '❌ Error al comunicarse con la base de datos.';
+            statusEl.style.color = '#e74c3c';
             return;
         }
 
-        document.getElementById('admin-panel').style.display = 'block';
-        statusEl.textContent = '✅ Clave válida. Puedes subir el JSON oficial.';
+        // Si llegamos aquí, la clave era correcta y el servidor nos mandó los cursos
+        const data = await respuesta.json();
+        builderCursosServidor = Array.isArray(data) ? data : [];
+        actualizarSelectorCursosServidor();
+
+        // Ocultamos el login y mostramos el panel secreto
+        panelLogin.style.display = 'none';
+        panelAdmin.style.display = 'block';
+        
+        if (builderCursosServidor.length === 0) {
+            setBuilderStatus('Acceso concedido. No hay cursos guardados aún.');
+        } else {
+            setBuilderStatus(`Acceso concedido. Cursos disponibles: ${builderCursosServidor.length}.`);
+        }
+
     } catch (err) {
         statusEl.textContent = `❌ Error de conexión: ${err.message}`;
+        statusEl.style.color = '#e74c3c';
     }
 }
 

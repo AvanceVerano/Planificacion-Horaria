@@ -152,65 +152,66 @@
         </div>
     </div>
 
-    <div id="screen-builder" class="screen">
-        <div class="setup-container">
-            <h1>Constructor de Cursos</h1>
-            
-            <div class="builder-header">
-                <div class="input-group">
-                    <label>Nombre del Curso:</label>
-                    <input type="text" id="builder-course-name" placeholder="Ej. Arquitectura de Software">
-                </div>
-                <div class="upload-edit-btn">
-                    <label for="edit-file-input" class="btn-secondary">✏️ Subir JSON para Editar</label>
-                    <input type="file" id="edit-file-input" accept=".json" style="display: none;" onchange="cargarJsonParaEditar(event)">
-                </div>
+<div id="screen-builder" class="screen">
+    <h2 style="text-align: center; color: var(--primary); margin-bottom: 20px;">Constructor de Cursos</h2>
+
+    <div class="builder-controls" style="margin-bottom: 20px;">
+        <div style="display: flex; gap: 10px; align-items: flex-end;">
+            <div class="input-group" style="flex: 2; margin: 0;">
+                <label>Nombre del Curso (Público):</label>
+                <input type="text" id="builder-course-name" placeholder="Ej. Arquitectura de Software">
             </div>
-            <div class="builder-crud">
-                <div class="input-group">
-                    <label>Curso en el servidor:</label>
-                    <select id="builder-course-select"></select>
-                </div>
-                <div class="builder-actions">
-                    <button class="btn-secondary" type="button" onclick="cargarCursosServidor()">🔄 Actualizar lista</button>
-                    <button class="btn-secondary" type="button" onclick="cargarCursoServidorSeleccionado()">⬇️ Cargar del servidor</button>
-                    <button class="btn-main" type="button" onclick="guardarCursoServidor()">💾 Guardar en servidor</button>
-                    <button class="btn-delete" type="button" onclick="eliminarCursoServidor()">🗑️ Eliminar</button>
-                </div>
-            </div>
-            <div id="builder-status" class="file-list-preview"></div>
-
-            <div id="sections-container"></div>
-
-            <button class="btn-secondary btn-full" onclick="agregarSeccionEnBlanco()">+ Agregar Nueva Sección</button>
-            <br>
-
-            <div class="builder-section-publica">
-                <h3>📤 Contribuidores</h3>
-                <p style="font-size:13px; color:#7f8c8d; margin-bottom:10px;">Descarga el JSON o envíalo por correo para que un administrador lo revise.</p>
-                <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                    <button class="btn-main" onclick="descargarJSON()">💾 Descargar JSON</button>
-                    <button class="btn-secondary" onclick="enviarPorCorreo()">✉️ Enviar para Revisión (Correo - fabrizioprogramador939@gmail.com)</button>
-                </div>
-            </div>
-
-            <div class="builder-section-privada">
-                <h3>🔒 Administradores</h3>
-                <p style="font-size:13px; color:#7f8c8d; margin-bottom:10px;">Acceso exclusivo para administradores del sistema.</p>
-                <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-                    <input type="password" id="admin-password-input" class="modern-input" placeholder="Clave de Admin" style="flex:1; min-width:180px;">
-                    <button class="btn-secondary" onclick="validarYMostrarPanelAdmin()">🔑 Validar y Mostrar Panel Admin</button>
-                </div>
-                <div id="admin-panel" style="display:none; margin-top:15px;">
-                    <label class="btn-secondary" style="cursor:pointer;">
-                        📂 Subir JSON Oficial a BD
-                        <input type="file" id="admin-upload-json" accept=".json" style="display:none;" onchange="subirJsonOficial(event)">
-                    </label>
-                    <div id="admin-upload-status" style="margin-top:8px; font-size:13px;"></div>
-                </div>
+            <div class="input-group" style="flex: 1; margin: 0;">
+                <label>O cargar JSON para editar:</label>
+                <input type="file" id="builder-file-input" accept=".json" onchange="cargarJsonParaEditar(event)">
             </div>
         </div>
     </div>
+
+    <div id="sections-container" style="margin-bottom: 20px;"></div>
+    <button class="btn-primary" style="width: 100%; margin-bottom: 20px;" onclick="agregarSeccionEnBlanco()">+ Agregar Nueva Sección</button>
+
+    <div style="border: 2px solid #3498db; padding: 15px; border-radius: 8px; margin-bottom: 20px; background-color: #ebf5fb;">
+        <h4 style="margin-top: 0; color: #2980b9;">🤝 Contribuidores (Alumnos)</h4>
+        <p style="font-size: 13px;">Descarga tu curso armado y envíalo al administrador para que lo apruebe (fabrizioprogramador939@gmail.com).</p>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-primary" style="flex: 1;" onclick="descargarJSON()">💾 Descargar JSON</button>
+            <button class="btn-secondary" style="flex: 1; background-color: #fff; color: #333; border: 1px solid #ccc;" onclick="enviarPorCorreo()">✉️ Enviar JSON por Correo</button>
+        </div>
+    </div>
+
+    <div id="admin-login-section" style="border: 2px solid #e74c3c; padding: 15px; border-radius: 8px; margin-bottom: 20px; background-color: #fdf2e9;">
+        <h4 style="margin-top: 0; color: #c0392b;">🔒 Acceso Administradores</h4>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <input type="password" id="admin-password-input" placeholder="Clave de Admin" style="flex: 2; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+            <button class="btn-primary" style="flex: 1; background-color: #e67e22;" onclick="validarYMostrarPanelAdmin()">🔑 Validar Clave</button>
+        </div>
+        <div id="admin-upload-status" style="margin-top: 10px; font-weight: bold; font-size: 14px;"></div>
+    </div>
+
+    <div id="admin-panel" style="display: none; border: 2px dashed #27ae60; padding: 15px; border-radius: 8px; background-color: #e9f7ef;">
+        <h4 style="margin-top: 0; color: #27ae60;">🛠️ Panel de Control de Base de Datos</h4>
+        
+        <div style="margin-bottom: 15px;">
+            <label>Cursos en el servidor:</label>
+            <select id="builder-course-select" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+                <option value="">-- Selecciona un curso --</option>
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <button class="btn-secondary" style="flex: 1;" onclick="cargarCursosServidor()">🔄 Refrescar Lista</button>
+            <button class="btn-secondary" style="flex: 1;" onclick="cargarCursoServidorSeleccionado()">⬇️ Cargar para Editar</button>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-primary" style="flex: 2;" onclick="guardarCursoServidor()">💾 Guardar Cambios en BD</button>
+            <button class="btn-delete" style="flex: 1;" onclick="eliminarCursoServidor()">🗑️ Eliminar de BD</button>
+        </div>
+        <div id="builder-status" style="margin-top: 10px; font-weight: bold; font-size: 13px; text-align: center;"></div>
+    </div>
+
+</div>
 
     <script src="script.js" defer></script>
 </body>
