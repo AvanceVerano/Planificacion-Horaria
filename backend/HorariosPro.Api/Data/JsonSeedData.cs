@@ -21,8 +21,6 @@ public static class JsonSeedData
         var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
         var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("JsonSeedData");
 
-        await dbContext.Database.EnsureCreatedAsync(cancellationToken);
-
         if (await dbContext.Cursos.AnyAsync(cancellationToken))
         {
             return;

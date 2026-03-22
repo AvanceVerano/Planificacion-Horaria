@@ -1,5 +1,6 @@
 using HorariosPro.Api.Data;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,15 +21,14 @@ builder.Services.AddDbContext<HorariosProDbContext>(options =>
         var databaseUri = new Uri(railwayDbUrl);
         var dbUserInfo = databaseUri.UserInfo.Split(':');
         
-        var connectionString = new Npgsql.NpgsqlConnectionStringBuilder
+        var connectionString = new NpgsqlConnectionStringBuilder
         {
             Host = databaseUri.Host,
             Port = databaseUri.Port,
             Database = databaseUri.AbsolutePath.TrimStart('/'),
             Username = dbUserInfo[0],
             Password = dbUserInfo[1],
-            SslMode = SslMode.Require,
-            TrustServerCertificate = true // Necesario para Railway
+            SslMode = SslMode.Require
         }.ToString();
         
         options.UseNpgsql(connectionString);
