@@ -52,7 +52,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-<<<<<<< HEAD
 // 3. AUTO-CREACIÓN DE TABLAS EN PRODUCCIÓN Y LOCAL
 using (var scope = app.Services.CreateScope())
 {
@@ -72,8 +71,6 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-=======
->>>>>>> 8d5c6a002d3a37529fb8979056be1db33a5f6527
 // Aplicar la política de CORS correcta
 app.UseCors("AllowVercel");
 
