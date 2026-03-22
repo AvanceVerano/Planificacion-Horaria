@@ -65,7 +65,7 @@
         "fin": "4:59pm"
       }
     ],
-    "profesor": "Velasquez Nuñez, Angel Augusto"
+    "profesor": "Velasquez Nunez, Angel Augusto"
   },
   {
     "seccion": "11863",
@@ -191,14 +191,14 @@
     "sede": "San Isidro",
     "sesiones": [
       {
-        "dia": "Mar",
-        "inicio": "7:00am",
-        "fin": "8:59am"
-      },
-      {
         "dia": "Vie",
         "inicio": "6:00pm",
         "fin": "8:59pm"
+      },
+      {
+        "dia": "Mar",
+        "inicio": "7:00am",
+        "fin": "8:59am"
       }
     ],
     "profesor": "Mori Paiva, Hugo Allan"
