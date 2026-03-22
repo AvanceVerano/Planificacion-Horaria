@@ -194,7 +194,7 @@
           </div>
           <div class="input-group" style="flex: 1; margin: 0;">
             <label>O cargar JSON para editar:</label>
-            <input type="file" id="builder-file-input" accept=".json" class="hidden-file-input" onchange="cargarJsonParaEditar(event)">
+            <input type="file" id="builder-file-input" accept=".json" style="display:none;" onchange="cargarJsonParaEditar(event)">
             <button class="btn-secondary" style="width:100%;" type="button" onclick="document.getElementById('builder-file-input').click()">
               <IconFolderOpen class="app-icon" /> Cargar JSON
             </button>
