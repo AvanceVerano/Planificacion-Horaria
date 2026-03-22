@@ -253,6 +253,18 @@
       </div>
     </div>
   </div>
+
+  <!-- Custom alert modal (replaces native alert()) -->
+  <div id="modal-alert" class="modal" role="alertdialog" aria-modal="true" aria-labelledby="modal-alert-title">
+    <div class="modal-content modal-alert-box">
+      <div class="modal-alert-icon" id="modal-alert-icon"></div>
+      <h3 id="modal-alert-title" class="modal-alert-title"></h3>
+      <p id="modal-alert-msg" class="modal-alert-msg"></p>
+      <div class="modal-actions" style="justify-content:center;">
+        <button class="btn-main" onclick="closeAlert()">Aceptar</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>

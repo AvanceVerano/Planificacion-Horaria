@@ -12,8 +12,37 @@ const SVG_MAP_PIN  = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height=
 const SVG_USER_SM  = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
 const SVG_WARNING  = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
 const SVG_CLICK    = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><path d="m4 4 7.07 17 2.51-7.39L21 11.07z"/></svg>`;
+// Modal alert icons (24 px, used inside the custom alert modal)
+const SVG_ALERT_CHECK   = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+const SVG_ALERT_XCIRCLE = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
+const SVG_ALERT_WARN    = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+const SVG_ALERT_INFO    = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
 
-// --- VARIABLES GLOBALES ---
+// --- CUSTOM ALERT MODAL ---
+function showAlert(message, type = 'info') {
+    const modal   = document.getElementById('modal-alert');
+    const titleEl = document.getElementById('modal-alert-title');
+    const msgEl   = document.getElementById('modal-alert-msg');
+    const iconEl  = document.getElementById('modal-alert-icon');
+    if (!modal) { console.warn(message); return; }
+
+    const configs = {
+        success: { title: 'Éxito',       svg: SVG_ALERT_CHECK,   cls: 'type-success' },
+        error:   { title: 'Error',        svg: SVG_ALERT_XCIRCLE, cls: 'type-error'   },
+        warning: { title: 'Advertencia',  svg: SVG_ALERT_WARN,    cls: 'type-warning' },
+        info:    { title: 'Información',  svg: SVG_ALERT_INFO,    cls: 'type-info'    },
+    };
+    const cfg = configs[type] || configs.info;
+    iconEl.className = `modal-alert-icon ${cfg.cls}`;
+    iconEl.innerHTML = cfg.svg;
+    titleEl.textContent = cfg.title;
+    msgEl.textContent = message;
+    modal.classList.add('active');
+}
+function closeAlert() {
+    const modal = document.getElementById('modal-alert');
+    if (modal) modal.classList.remove('active');
+}
 const startHour = 7, endHour = 23;
 const totalMinutes = (endHour - startHour) * 60;
 const paletaColores = ['#4A90E2', '#E74C3C', '#50E3C2', '#F5A623', '#9B59B6', '#34495E', '#16A085', '#D35400'];
@@ -683,7 +712,7 @@ function dibujarBloqueUnicoInteligente(ses, dia, width, left) {
 function guardarHorarioInteractivoComoFav() {
     favsInd.push([...horarioInteractivoActual]);
     document.getElementById('fav-ind-status').innerText = `${favsInd.length} guardados`;
-    alert("¡Horario guardado en tus Favoritos! ⭐\nPuedes ir a la pestaña Favoritos para descargarlo.");
+    showAlert("¡Horario guardado en tus Favoritos!\nPuedes ir a la pestaña Favoritos para descargarlo.", 'success');
 }
 
 async function solicitarHorariosGrupalesApi(estudiantes, sedesPermitidas) {
@@ -873,7 +902,7 @@ async function readStudentFiles(event, index) {
             // Recopilamos las sedes globalmente
             json.forEach(sec => sedesGrpGlobales.add(sec.sede));
         } catch (e) {
-            alert(`Error al leer ${f.name} en el alumno ${index + 1}.`);
+            showAlert(`Error al leer ${f.name} en el alumno ${index + 1}.`, 'error');
         }
     }
     
@@ -1056,7 +1085,7 @@ function actualizarBotonFavorito() {
 
 function descargarFavs(tipo) {
     const arr = tipo === 'ind' ? favsInd : favsGrp;
-    if (arr.length === 0) return alert("Nada que descargar.");
+    if (arr.length === 0) { showAlert("Nada que descargar.", 'warning'); return; }
     const url = URL.createObjectURL(new Blob([JSON.stringify(arr, null, 4)], {type:"application/json"}));
     const a = document.createElement("a"); a.href = url; a.download = `favoritos_${tipo}.json`; a.click();
 }
@@ -1066,7 +1095,7 @@ async function cargarFavs(event, tipo) {
         const json = JSON.parse(await event.target.files[0].text());
         if (tipo === 'ind') { favsInd = json; document.getElementById('fav-ind-status').innerText = `${json.length} guardados`; }
         else { favsGrp = json; document.getElementById('fav-grp-status').innerText = `${json.length} guardados`; }
-    } catch(e) { alert("Error al cargar JSON."); }
+    } catch(e) { showAlert("Error al cargar JSON.", 'error'); }
 }
 
 function verFavoritos(tipo) {
@@ -1439,7 +1468,7 @@ async function cargarJsonParaEditar(event) {
         
         // Validar que el archivo sea una lista (array)
         if (!Array.isArray(json)) {
-            alert("El archivo no tiene el formato correcto. Debe ser una lista de secciones.");
+            showAlert("El archivo no tiene el formato correcto. Debe ser una lista de secciones.", 'error');
             event.target.value = ''; 
             return;
         }
@@ -1460,7 +1489,7 @@ async function cargarJsonParaEditar(event) {
 
     } catch (e) {
         console.error(e);
-        alert("Error al leer el archivo JSON. Verifica que no esté corrupto.");
+        showAlert("Error al leer el archivo JSON. Verifica que no esté corrupto.", 'error');
     }
     
     event.target.value = ''; // Resetear el input
@@ -1549,7 +1578,7 @@ function guardarSesion() {
     const inicio = document.getElementById('modal-inicio').value;
     const fin = document.getElementById('modal-fin').value;
 
-    if (!inicio || !fin) { alert("Llena las horas de inicio y fin."); return; }
+    if (!inicio || !fin) { showAlert("Llena las horas de inicio y fin.", 'warning'); return; }
 
     editorData[currentTargetSectionIndex].sesiones.push({ dia, inicio, fin });
     cerrarModal();
@@ -1561,8 +1590,8 @@ function descargarJSON() {
     
     // Validar secciones vacías
     for (let sec of editorData) {
-        if (!sec.seccion) { alert("Asegúrate de que todas las secciones tengan un Código."); return; }
-        if (sec.sesiones.length === 0) { alert(`La sección ${sec.seccion} no tiene horarios.`); return; }
+        if (!sec.seccion) { showAlert("Asegúrate de que todas las secciones tengan un Código.", 'warning'); return; }
+        if (sec.sesiones.length === 0) { showAlert(`La sección ${sec.seccion} no tiene horarios.`, 'warning'); return; }
     }
 
     const dataStr = JSON.stringify(editorData, null, 4);
@@ -1590,7 +1619,7 @@ function enviarPorCorreo() {
     window.open(`mailto:${ADMIN_EMAIL}?subject=${asunto}&body=${cuerpo}`, '_self');
     
     // 4. Le avisamos al usuario que debe adjuntar el archivo manualmente
-    alert("Se ha abierto tu aplicación de correo. \n\n¡IMPORTANTE! No olvides ADJUNTAR el archivo .json que descargaste antes de enviar el correo.");
+    showAlert("Se ha abierto tu aplicación de correo.\n\n¡IMPORTANTE! No olvides ADJUNTAR el archivo .json que descargaste antes de enviar el correo.", 'info');
 }
 
 async function hashSHA256(texto) {
@@ -1665,7 +1694,7 @@ async function subirJsonOficial(event) {
 
     const statusEl = document.getElementById('admin-upload-status');
     const password = document.getElementById('admin-password-input').value;
-    if (!password) { alert('Ingresa la clave de administrador antes de subir.'); return; }
+    if (!password) { showAlert('Ingresa la clave de administrador antes de subir.', 'warning'); return; }
 
     const nombreCurso = document.getElementById('builder-course-name').value.trim() || file.name.replace('.json', '');
 

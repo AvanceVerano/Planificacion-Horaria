@@ -536,6 +536,44 @@ input[type="text"]:focus {
     gap: 10px;
 }
 
+/* ─── Alert Modal ───────────────────────────────────────────── */
+.modal-alert-box {
+    text-align: center;
+    max-width: 380px;
+}
+
+.modal-alert-icon {
+    margin: 0 auto 14px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-alert-icon svg { stroke-width: 1.5; }
+
+.modal-alert-icon.type-success { background: #e8f5e9; color: #2e7d32; }
+.modal-alert-icon.type-error   { background: #fdecea; color: #c62828; }
+.modal-alert-icon.type-warning { background: #fff8e1; color: #e65100; }
+.modal-alert-icon.type-info    { background: #e3f2fd; color: #1565c0; }
+
+.modal-alert-title {
+    margin: 0 0 8px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.modal-alert-msg {
+    margin: 0 0 20px;
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-line;
+}
+
 /* ─── Calendar Header ────────────────────────────────────────── */
 .header {
     display: flex;
