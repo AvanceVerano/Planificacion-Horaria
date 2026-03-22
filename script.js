@@ -8,7 +8,7 @@ let catalogoDisponible = false;
 let catalogoCursos = [];
 let origenDatosInd = 'ninguno';
 let origenDatosGrp = 'ninguno';
-const API_BASE_URL = 'http://localhost:5067';
+const API_BASE_URL = 'https://planificacion-horaria-production.up.railway.app';
 const ADMIN_EMAIL = 'admin@horariospro.com';
 
 // Estado del Calendario Actual

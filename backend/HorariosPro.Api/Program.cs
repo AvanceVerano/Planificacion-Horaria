@@ -16,16 +16,25 @@ builder.Services.AddDbContext<HorariosProDbContext>(options =>
 {
     if (!string.IsNullOrEmpty(railwayDbUrl))
     {
-        // Configuración para Railway (PostgreSQL)
-        var uri = new Uri(railwayDbUrl);
-        var userInfo = uri.UserInfo.Split(':');
-        var connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};Ssl Mode=Require;Trust Server Certificate=true;";
+        // Limpieza robusta de la URL de Railway
+        var databaseUri = new Uri(railwayDbUrl);
+        var dbUserInfo = databaseUri.UserInfo.Split(':');
+        
+        var connectionString = new Npgsql.NpgsqlConnectionStringBuilder
+        {
+            Host = databaseUri.Host,
+            Port = databaseUri.Port,
+            Database = databaseUri.AbsolutePath.TrimStart('/'),
+            Username = dbUserInfo[0],
+            Password = dbUserInfo[1],
+            SslMode = SslMode.Require,
+            TrustServerCertificate = true // Necesario para Railway
+        }.ToString();
         
         options.UseNpgsql(connectionString);
     }
     else
     {
-        // Configuración para tu PC Local (SQLite)
         options.UseSqlite(builder.Configuration.GetConnectionString("HorariosPro") ?? "Data Source=horariospro.db");
     }
 });
