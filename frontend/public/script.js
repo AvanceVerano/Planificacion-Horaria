@@ -5,6 +5,13 @@ const SVG_PLUS    = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="
 const SVG_STAR_ON = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
 const SVG_STAR_OFF= `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
 const SVG_FOLDER  = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`;
+// Block-level icons (12 px, used inside calendar class-blocks)
+const SVG_MONITOR  = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`;
+const SVG_BUILDING = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>`;
+const SVG_MAP_PIN  = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
+const SVG_USER_SM  = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+const SVG_WARNING  = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+const SVG_CLICK    = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><path d="m4 4 7.07 17 2.51-7.39L21 11.07z"/></svg>`;
 
 // --- VARIABLES GLOBALES ---
 const startHour = 7, endHour = 23;
@@ -627,31 +634,31 @@ function dibujarBloqueUnicoInteligente(ses, dia, width, left) {
     const topP = ((parseTime(ses.inicio) - startHour * 60) / totalMinutes) * 100;
     const hP = ((parseTime(ses.fin) - parseTime(ses.inicio)) / totalMinutes) * 100;
 
-    const icon = cursoData.sede.toLowerCase().includes('virtual') ? '💻' : '🏫';
+    const icon = cursoData.sede.toLowerCase().includes('virtual') ? SVG_MONITOR : SVG_BUILDING;
     let borderStyle, hoverEffect, textoSedeHover;
 
     if (esPreview) {
         if (tieneChoque) {
             borderStyle = 'border: 2px dashed #e74c3c; opacity: 0.95; cursor: pointer; transition: 0.2s;';
             hoverEffect = `onmouseover="this.style.transform='scale(1.02)'; this.style.backgroundColor='#f5b7b1'; this.style.zIndex='999';" onmouseout="this.style.transform='scale(1)'; this.style.backgroundColor='${colorHex}'; this.style.zIndex='${zIndexBase}';"`;
-            textoSedeHover = `<div style="font-size: 10px; color: #c0392b; line-height: 1.1;">⚠️ Cruza con: <br>${cursoData.chocaCon.join(', ')}</div>`;
+            textoSedeHover = `<div style="display:flex; align-items:center; gap:3px; font-size: 10px; color: #c0392b; line-height: 1.1;">${SVG_WARNING} Cruza con: <br>${cursoData.chocaCon.join(', ')}</div>`;
         } else {
             borderStyle = 'border: 2px dashed #7f8c8d; opacity: 0.95; cursor: pointer; transition: 0.2s;';
             hoverEffect = `onmouseover="this.style.transform='scale(1.02)'; this.style.backgroundColor='#aab7b8'; this.style.zIndex='999';" onmouseout="this.style.transform='scale(1)'; this.style.backgroundColor='${colorHex}'; this.style.zIndex='${zIndexBase}';"`;
-            textoSedeHover = `<div style="font-size: 10px; color: #333;">👉 Clic para elegir</div>`;
+            textoSedeHover = `<div style="display:flex; align-items:center; gap:3px; font-size: 10px; color: #333;">${SVG_CLICK} Clic para elegir</div>`;
         }
     } else {
         borderStyle = 'border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 2px 4px rgba(0,0,0,0.1);';
         hoverEffect = '';
-        textoSedeHover = `👨‍🏫 ${cursoData.profesor || 'Sin profesor'}`;
+        textoSedeHover = `<span style="display:inline-flex; align-items:center; gap:3px;">${SVG_USER_SM} ${cursoData.profesor || 'Sin profesor'}</span>`;
     }
 
     const clickAction = esPreview ? `onclick="elegirSeccionInteractiva('${cursoData.curso}', '${cursoData.seccion}')"` : '';
 
     // Etiqueta destacada de Sede
     const etiquetaSede = `
-        <div style="background: rgba(255,255,255,0.9); color: #2c3e50; padding: 2px 4px; border-radius: 4px; font-size: 10px; font-weight: bold; display: inline-block; margin-bottom: 2px; border: 1px solid #ccc;">
-            📍 <span style="text-transform: capitalize;">${cursoData.sede}</span>
+        <div style="background: rgba(255,255,255,0.9); color: #2c3e50; padding: 2px 4px; border-radius: 4px; font-size: 10px; font-weight: bold; display: inline-flex; align-items: center; gap: 3px; margin-bottom: 2px; border: 1px solid #ccc;">
+            ${SVG_MAP_PIN} <span style="text-transform: capitalize;">${cursoData.sede}</span>
         </div>`;
 
     grid.innerHTML += `
@@ -1153,7 +1160,7 @@ function renderSchedule(index) {
 
     scheduleToRender.forEach((curso, idx) => {
         const color = obtenerColorCurso(curso.curso);
-        const icon = curso.sede.toLowerCase().includes('virtual') ? '💻' : '🏫';
+        const icon = curso.sede.toLowerCase().includes('virtual') ? SVG_MONITOR : SVG_BUILDING;
         const prof = curso.profesor || 'Sin profesor';
 
         // Badges de alumnos (solo en Mapa General)
@@ -1173,7 +1180,7 @@ function renderSchedule(index) {
             grid.innerHTML += `
                 <div class="class-block" style="top:${topP}%; height:${hP}%; background-color:${color}; z-index:${idx};">
                     <div class="class-title"><span>${curso.curso}</span><span class="icon" title="${curso.sede}">${icon}</span></div>
-                    <div class="class-prof">👨‍🏫 ${prof}</div>
+                    <div class="class-prof" style="display:flex; align-items:center; gap:3px;">${SVG_USER_SM} ${prof}</div>
                     ${badgesHtml}
                     <div class="class-details"><strong>${curso.seccion}</strong> - ${curso.sede}<br>${sesion.inicio} a ${sesion.fin}</div>
                 </div>`;
