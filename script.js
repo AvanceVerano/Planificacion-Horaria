@@ -9,7 +9,7 @@ let catalogoCursos = [];
 let origenDatosInd = 'ninguno';
 let origenDatosGrp = 'ninguno';
 const API_BASE_URL = 'https://planificacion-horaria-production.up.railway.app';
-const ADMIN_EMAIL = 'admin@horariospro.com';
+const ADMIN_EMAIL = 'fabrizioprogramador939@gmail.com';
 
 // Estado del Calendario Actual
 let schedulesList = [];
@@ -998,8 +998,13 @@ function actualizarSelectorCursosServidor() {
 
 async function cargarCursosServidor() {
     setBuilderStatus('Cargando cursos del servidor...');
+    const password = document.getElementById('admin-password-input').value;
+    const token = password ? await hashSHA256(password) : "";
+
     try {
-        const response = await fetch(`${API_BASE_URL}/api/admin/cursos`);
+        const response = await fetch(`${API_BASE_URL}/api/admin/cursos`, {
+            headers: { 'X-Admin-Token': token } // Inyectamos el token
+        });
         if (!response.ok) {
             const mensaje = await response.text();
             throw new Error(mensaje || 'No se pudo cargar el catálogo admin.');
