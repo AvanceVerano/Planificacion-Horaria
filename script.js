@@ -86,6 +86,41 @@ function escapeHtml(value) {
         .replace(/'/g, '&#039;');
 }
 
+// --- FILTROS AVANZADOS ---
+function seccionCumpleFiltros(sec, diasLibres, minutos_min, minutos_max) {
+    for (const sesion of (sec.sesiones || [])) {
+        if (diasLibres.includes(sesion.dia)) return false;
+        const inicio = parseTime(sesion.inicio);
+        const fin = parseTime(sesion.fin);
+        if (inicio < minutos_min || fin > minutos_max) return false;
+    }
+    return true;
+}
+
+function parseTimeInputToMinutes(timeStr, defaultMinutes) {
+    if (!timeStr) return defaultMinutes;
+    const parts = timeStr.split(':');
+    if (parts.length < 2) return defaultMinutes;
+    const h = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10);
+    if (isNaN(h) || isNaN(m)) return defaultMinutes;
+    return h * 60 + m;
+}
+
+function leerFiltrosInd() {
+    const diasLibres = Array.from(document.querySelectorAll('.chk-dia-libre-ind:checked')).map(cb => cb.value);
+    const minutos_min = parseTimeInputToMinutes(document.getElementById('hora-min-ind').value, startHour * 60);
+    const minutos_max = parseTimeInputToMinutes(document.getElementById('hora-max-ind').value, endHour * 60);
+    return { diasLibres, minutos_min, minutos_max };
+}
+
+function leerFiltrosGrp() {
+    const diasLibres = Array.from(document.querySelectorAll('.chk-dia-libre-grp:checked')).map(cb => cb.value);
+    const minutos_min = parseTimeInputToMinutes(document.getElementById('hora-min-grp').value, startHour * 60);
+    const minutos_max = parseTimeInputToMinutes(document.getElementById('hora-max-grp').value, endHour * 60);
+    return { diasLibres, minutos_min, minutos_max };
+}
+
 // --- CATALOGO API ---
 async function cargarCatalogoDesdeApi() {
     const estado = document.getElementById('file-list-preview-ind');
@@ -201,6 +236,7 @@ async function procesarArchivosInd(event) {
 async function iniciarGeneracionInd() {
     const cursosReq = Array.from(document.querySelectorAll('.chk-curso:checked')).map(cb => cb.value);
     const sedesReq = Array.from(document.querySelectorAll('.chk-sede:checked')).map(cb => cb.value);
+    const { diasLibres, minutos_min, minutos_max } = leerFiltrosInd();
     horariosInd = [];
     document.getElementById('error-msg').innerText = '';
 
@@ -213,7 +249,9 @@ async function iniciarGeneracionInd() {
         const horariosApi = await solicitarHorariosIndividualApi(cursosReq, sedesReq);
         if (!horariosApi) return;
 
-        horariosInd = horariosApi;
+        horariosInd = horariosApi.filter(schedule =>
+            schedule.every(sec => seccionCumpleFiltros(sec, diasLibres, minutos_min, minutos_max))
+        );
         if (horariosInd.length === 0) {
             document.getElementById('error-msg').innerText = "No se encontró ninguna combinación posible. Intenta quitar cursos que se crucen o selecciona más sedes.";
             return;
@@ -235,6 +273,7 @@ async function iniciarGeneracionInd() {
         let curso = cursosReq[idx];
         for (let sec of (cursosDataInd[curso] || [])) {
             if (!sedesReq.includes(sec.sede)) continue;
+            if (!seccionCumpleFiltros(sec, diasLibres, minutos_min, minutos_max)) continue;
             if (!choca(actual, sec)) {
                 actual.push({ ...sec, curso: curso });
                 buscar(idx + 1, actual);
@@ -490,6 +529,7 @@ async function iniciarGeneracionGrupal() {
 
     // Obtener filtros seleccionados
     const sedesPermitidas = Array.from(document.querySelectorAll('.chk-sede-grp:checked')).map(cb => cb.value);
+    const { diasLibres: diasLibresGrp, minutos_min: minGrp, minutos_max: maxGrp } = leerFiltrosGrp();
 
     if (sedesPermitidas.length === 0) {
         document.getElementById('error-msg-group').innerText = "Debes seleccionar al menos una sede permitida en los filtros grupales.";
@@ -513,7 +553,9 @@ async function iniciarGeneracionGrupal() {
 
         const horariosApi = await solicitarHorariosGrupalesApi(payloadEstudiantes, sedesPermitidas);
         if (!horariosApi) return;
-        horariosGrp = horariosApi;
+        horariosGrp = horariosApi.filter(schedule =>
+            schedule.every(sec => seccionCumpleFiltros(sec, diasLibresGrp, minGrp, maxGrp))
+        );
     } else {
         let globalCoursesSet = new Set();
         let globalData = {};
@@ -537,6 +579,7 @@ async function iniciarGeneracionGrupal() {
             for (let sec of sections) {
                 // APLICAMOS EL FILTRO GRUPAL: Si la sede no está permitida, descartar
                 if (!sedesPermitidas.includes(sec.sede)) continue;
+                if (!seccionCumpleFiltros(sec, diasLibresGrp, minGrp, maxGrp)) continue;
 
                 let isValidForAll = true;
 

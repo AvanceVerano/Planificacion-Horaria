@@ -759,6 +759,23 @@ select:focus {
     box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
 }
 
+.modern-input-time {
+    padding: 6px 10px;
+    border: 2px solid #bdc3c7;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #2c3e50;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.modern-input-time:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
 .student-drop * {
     pointer-events: none;
 }

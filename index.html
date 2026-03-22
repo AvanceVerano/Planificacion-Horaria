@@ -52,6 +52,30 @@
                 </div>
             </div>
 
+            <div class="step">
+                <h3>4. Filtros Opcionales</h3>
+                <div style="margin-bottom: 15px;">
+                    <strong style="display: block; margin-bottom: 8px; color: #2c3e50;">Días libres (sin clases):</strong>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-item"><input type="checkbox" class="chk-dia-libre-ind" value="Lun"> Lunes</label>
+                        <label class="checkbox-item"><input type="checkbox" class="chk-dia-libre-ind" value="Mar"> Martes</label>
+                        <label class="checkbox-item"><input type="checkbox" class="chk-dia-libre-ind" value="Mie"> Miércoles</label>
+                        <label class="checkbox-item"><input type="checkbox" class="chk-dia-libre-ind" value="Jue"> Jueves</label>
+                        <label class="checkbox-item"><input type="checkbox" class="chk-dia-libre-ind" value="Vie"> Viernes</label>
+                        <label class="checkbox-item"><input type="checkbox" class="chk-dia-libre-ind" value="Sab"> Sábado</label>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+                    <strong style="color: #2c3e50;">Rango Horario:</strong>
+                    <label style="display: flex; align-items: center; gap: 8px;">
+                        Desde: <input type="time" id="hora-min-ind" value="07:00" class="modern-input-time">
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px;">
+                        Hasta: <input type="time" id="hora-max-ind" value="22:00" class="modern-input-time">
+                    </label>
+                </div>
+            </div>
+
             <button id="btn-generar" class="btn-main" onclick="iniciarGeneracionInd()" disabled>Generar Horarios</button>
             <div id="error-msg"></div>
         </div>
@@ -83,6 +107,27 @@
                 <h3>Filtros Grupales Permitidos</h3>
                 <p style="font-size: 13px; color: #7f8c8d;">Selecciona las sedes válidas para todo el grupo.</p>
                 <div id="sedes-container-grp" class="checkbox-grid"></div>
+
+                <div style="margin-top: 15px;">
+                    <strong style="display: block; margin-bottom: 8px; color: #2c3e50;">Días libres (sin clases):</strong>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-item"><input type="checkbox" class="chk-dia-libre-grp" value="Lun"> Lunes</label>
+                        <label class="checkbox-item"><input type="checkbox" class="chk-dia-libre-grp" value="Mar"> Martes</label>
+                        <label class="checkbox-item"><input type="checkbox" class="chk-dia-libre-grp" value="Mie"> Miércoles</label>
+                        <label class="checkbox-item"><input type="checkbox" class="chk-dia-libre-grp" value="Jue"> Jueves</label>
+                        <label class="checkbox-item"><input type="checkbox" class="chk-dia-libre-grp" value="Vie"> Viernes</label>
+                        <label class="checkbox-item"><input type="checkbox" class="chk-dia-libre-grp" value="Sab"> Sábado</label>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap; margin-top: 15px;">
+                    <strong style="color: #2c3e50;">Rango Horario:</strong>
+                    <label style="display: flex; align-items: center; gap: 8px;">
+                        Desde: <input type="time" id="hora-min-grp" value="07:00" class="modern-input-time">
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px;">
+                        Hasta: <input type="time" id="hora-max-grp" value="22:00" class="modern-input-time">
+                    </label>
+                </div>
             </div>
 
             <button id="btn-generar-grupo" class="btn-main" onclick="iniciarGeneracionGrupal()" style="display: none; margin-top: 20px;">Generar Horarios Grupales</button>
