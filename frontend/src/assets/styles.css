@@ -447,8 +447,11 @@ input[type="text"]:focus {
     font-weight: 600;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     transition: .2s;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .btn-delete:hover {

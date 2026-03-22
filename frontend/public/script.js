@@ -17,6 +17,10 @@ const SVG_ALERT_CHECK   = `<svg xmlns="http://www.w3.org/2000/svg" width="24" he
 const SVG_ALERT_XCIRCLE = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
 const SVG_ALERT_WARN    = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
 const SVG_ALERT_INFO    = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+// Inline status icons (15 px, used in admin status messages)
+const SVG_STATUS_OK   = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+const SVG_STATUS_ERR  = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
+const SVG_STATUS_WAIT = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
 
 // --- CUSTOM ALERT MODAL ---
 function showAlert(message, type = 'info') {
@@ -42,6 +46,12 @@ function showAlert(message, type = 'info') {
 function closeAlert() {
     const modal = document.getElementById('modal-alert');
     if (modal) modal.classList.remove('active');
+}
+function setAdminStatus(el, msg, type = 'error') {
+    const colors  = { success: '#2e7d32', error: '#c62828', loading: '#e65100' };
+    const icons   = { success: SVG_STATUS_OK, error: SVG_STATUS_ERR, loading: SVG_STATUS_WAIT };
+    el.style.color = colors[type] || colors.error;
+    el.innerHTML   = `<span style="display:inline-flex;align-items:center;gap:6px;">${icons[type] || SVG_STATUS_ERR} ${msg}</span>`;
 }
 const startHour = 7, endHour = 23;
 const totalMinutes = (endHour - startHour) * 60;
@@ -1637,13 +1647,11 @@ async function validarYMostrarPanelAdmin() {
     const panelLogin = document.getElementById('admin-login-section');
 
     if (!password) { 
-        statusEl.textContent = '❌ Ingresa la clave de administrador.'; 
-        statusEl.style.color = '#e74c3c';
+        setAdminStatus(statusEl, 'Ingresa la clave de administrador.', 'error');
         return; 
     }
 
-    statusEl.textContent = '⏳ Validando clave con el servidor...';
-    statusEl.style.color = '#f39c12';
+    setAdminStatus(statusEl, 'Validando clave con el servidor...', 'loading');
 
     try {
         const token = await hashSHA256(password);
@@ -1655,15 +1663,13 @@ async function validarYMostrarPanelAdmin() {
         });
 
         if (respuesta.status === 401) {
-            statusEl.textContent = '❌ Clave incorrecta. Acceso denegado.';
-            statusEl.style.color = '#e74c3c';
+            setAdminStatus(statusEl, 'Clave incorrecta. Acceso denegado.', 'error');
             panelAdmin.style.display = 'none';
             return;
         }
         
         if (!respuesta.ok) {
-            statusEl.textContent = '❌ Error al comunicarse con la base de datos.';
-            statusEl.style.color = '#e74c3c';
+            setAdminStatus(statusEl, 'Error al comunicarse con la base de datos.', 'error');
             return;
         }
 
@@ -1683,8 +1689,7 @@ async function validarYMostrarPanelAdmin() {
         }
 
     } catch (err) {
-        statusEl.textContent = `❌ Error de conexión: ${err.message}`;
-        statusEl.style.color = '#e74c3c';
+        setAdminStatus(statusEl, `Error de conexión: ${err.message}`, 'error');
     }
 }
 
@@ -1699,7 +1704,7 @@ async function subirJsonOficial(event) {
     const nombreCurso = document.getElementById('builder-course-name').value.trim() || file.name.replace('.json', '');
 
     try {
-        statusEl.textContent = '⏳ Procesando...';
+        setAdminStatus(statusEl, 'Procesando...', 'loading');
         const token = await hashSHA256(password);
         const contenido = await file.text();
         const secciones = JSON.parse(contenido);
@@ -1716,20 +1721,20 @@ async function subirJsonOficial(event) {
         });
 
         if (respuesta.status === 401) {
-            statusEl.textContent = '❌ Acceso denegado: clave incorrecta.';
+            setAdminStatus(statusEl, 'Acceso denegado: clave incorrecta.', 'error');
             return;
         }
         if (!respuesta.ok) {
             const error = await respuesta.text();
-            statusEl.textContent = `❌ Error del servidor: ${error}`;
+            setAdminStatus(statusEl, `Error del servidor: ${error}`, 'error');
             return;
         }
 
         const resultado = await respuesta.json();
-        statusEl.textContent = `✅ Curso "${resultado.nombre}" subido correctamente (ID: ${resultado.id}).`;
+        setAdminStatus(statusEl, `Curso "${resultado.nombre}" subido correctamente (ID: ${resultado.id}).`, 'success');
         await cargarCursosServidor();
     } catch (err) {
-        statusEl.textContent = `❌ Error: ${err.message}`;
+        setAdminStatus(statusEl, `Error: ${err.message}`, 'error');
     } finally {
         event.target.value = '';
     }
