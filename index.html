@@ -52,6 +52,13 @@
                 </div>
             </div>
 
+            <div class="step">
+                <h3>4. Filtros Opcionales (Bloqueos)</h3>
+                <p style="font-size: 13px; color: #7f8c8d; margin-bottom: 10px;">Marca "Día Libre" si no quieres clases en todo el día, o agrega rangos de horas donde NO puedes estudiar.</p>
+                <div id="filtros-ind-container" class="bloqueos-container">
+                    </div>
+            </div>
+
             <button id="btn-generar" class="btn-main" onclick="iniciarGeneracionInd()" disabled>Generar Horarios</button>
             <div id="error-msg"></div>
         </div>
@@ -76,14 +83,13 @@
                 <span style="font-size: 12px; color: #7f8c8d;">Si faltan cursos en la base, puedes subir JSON.</span>
             </div>
 
-            <div id="students-container">
-                </div>
-
             <div id="group-filters-section" class="step" style="display: none;">
-                <h3>Filtros Grupales Permitidos</h3>
-                <p style="font-size: 13px; color: #7f8c8d;">Selecciona las sedes válidas para todo el grupo.</p>
+                <h3>Sedes Permitidas (Grupo)</h3>
                 <div id="sedes-container-grp" class="checkbox-grid"></div>
             </div>
+
+            <div id="students-container">
+                </div>
 
             <button id="btn-generar-grupo" class="btn-main" onclick="iniciarGeneracionGrupal()" style="display: none; margin-top: 20px;">Generar Horarios Grupales</button>
             <div id="error-msg-group"></div>

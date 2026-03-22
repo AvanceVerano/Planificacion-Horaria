@@ -1,7 +1,7 @@
 :root {
     --start-hour: 7;
-    --end-hour: 22;
-    --total-hours: 15;
+    --end-hour: 23;
+    --total-hours: 16;
     --primary: #3498db;
     --primary-dark: #2980b9;
     --secondary: #2c3e50;
@@ -759,6 +759,23 @@ select:focus {
     box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
 }
 
+.modern-input-time {
+    padding: 6px 10px;
+    border: 2px solid #bdc3c7;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #2c3e50;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.modern-input-time:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
 .student-drop * {
     pointer-events: none;
 }
@@ -769,4 +786,57 @@ select:focus {
     justify-content: center;
     align-items: center;
     min-height: 100px;
+}
+
+/* FILTROS DE BLOQUEO */
+.bloqueos-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.bloqueo-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    background: white;
+    padding: 12px;
+    border: 1px solid #e1e8ed;
+    border-radius: 8px;
+}
+.bloqueo-dia-label {
+    min-width: 100px;
+    font-weight: bold;
+    color: #2c3e50;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.bloqueo-rangos {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-grow: 1;
+}
+.rango-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f8fafc;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px dashed #bdc3c7;
+}
+.btn-add-rango {
+    background: #e1e8ed;
+    color: #2c3e50;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    align-self: flex-start;
+}
+.btn-add-rango:hover {
+    background: #bdc3c7;
 }
