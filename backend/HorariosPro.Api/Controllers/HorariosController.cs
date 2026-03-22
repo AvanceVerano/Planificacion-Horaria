@@ -25,19 +25,18 @@ public class HorariosController : ControllerBase
         [FromBody] HorarioIndividualRequest request,
         CancellationToken cancellationToken)
     {
-        var filtros = BuildFilters(request.Sedes, request.DiasLibres, request.RangoHorario);
-        if (filtros.Result is not null)
-        {
-            return filtros.Result;
-        }
+        // 1. Armar filtros globales (Ahora solo maneja Sedes)
+        var filtros = BuildFilters(request.Sedes);
 
+        // 2. Buscar los cursos en la base de datos
         var cursosSeleccionados = await ResolveCursosAsync(request.CursoIds, request.Cursos, cancellationToken);
         if (cursosSeleccionados.Result is not null)
         {
             return cursosSeleccionados.Result;
         }
 
-        var resultados = _generator.GenerarIndividual(cursosSeleccionados.Value!, filtros.Value!);
+        // 3. Generar pasando los Bloqueos específicos
+        var resultados = _generator.GenerarIndividual(cursosSeleccionados.Value!, filtros, request.Bloqueos);
         return Ok(resultados);
     }
 
@@ -51,11 +50,7 @@ public class HorariosController : ControllerBase
             return BadRequest("Se requiere al menos un estudiante.");
         }
 
-        var filtros = BuildFilters(request.Sedes, request.DiasLibres, request.RangoHorario);
-        if (filtros.Result is not null)
-        {
-            return filtros.Result;
-        }
+        var filtros = BuildFilters(request.Sedes);
 
         var cursosIds = request.Estudiantes.SelectMany(e => e.CursoIds ?? new List<int>()).Distinct().ToList();
         var cursosNombres = request.Estudiantes.SelectMany(e => e.Cursos ?? new List<string>()).Distinct().ToList();
@@ -105,10 +100,11 @@ public class HorariosController : ControllerBase
                 return BadRequest($"El estudiante {estudiante.Nombre} no tiene cursos asignados.");
             }
 
-            estudiantes.Add(new HorarioGenerator.EstudiantePlan(estudiante.Nombre, cursosEstudiante));
+            // INYECTAR LOS BLOQUEOS PERSONALES AL ESTUDIANTE AQUÍ
+            estudiantes.Add(new HorarioGenerator.EstudiantePlan(estudiante.Nombre, cursosEstudiante, estudiante.Bloqueos));
         }
 
-        var resultados = _generator.GenerarGrupal(cursosSeleccionados.Value!, estudiantes, filtros.Value!);
+        var resultados = _generator.GenerarGrupal(cursosSeleccionados.Value!, estudiantes, filtros);
         return Ok(resultados);
     }
 
@@ -171,10 +167,8 @@ public class HorariosController : ControllerBase
         return (cursosSeleccionados, null);
     }
 
-    private static (HorarioGenerator.ScheduleFilters? Value, ActionResult<List<HorarioResultadoDto>>? Result) BuildFilters(
-        List<string>? sedes,
-        List<string>? diasLibres,
-        RangoHorarioDto? rangoHorario)
+    // El constructor de filtros ahora es mucho más simple porque ya no parsea horas
+    private static HorarioGenerator.ScheduleFilters BuildFilters(List<string>? sedes)
     {
         var sedesSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         if (sedes is not null)
@@ -188,49 +182,6 @@ public class HorariosController : ControllerBase
             }
         }
 
-        var diasSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        if (diasLibres is not null)
-        {
-            foreach (var dia in diasLibres)
-            {
-                if (!string.IsNullOrWhiteSpace(dia))
-                {
-                    diasSet.Add(dia.Trim());
-                }
-            }
-        }
-
-        TimeSpan? inicio = null;
-        TimeSpan? fin = null;
-
-        if (rangoHorario is not null)
-        {
-            if (!string.IsNullOrWhiteSpace(rangoHorario.Inicio))
-            {
-                if (!TimeParser.TryParse(rangoHorario.Inicio, out var parsed))
-                {
-                    return (null, new BadRequestObjectResult($"Hora de inicio inválida: {rangoHorario.Inicio}"));
-                }
-
-                inicio = parsed;
-            }
-
-            if (!string.IsNullOrWhiteSpace(rangoHorario.Fin))
-            {
-                if (!TimeParser.TryParse(rangoHorario.Fin, out var parsed))
-                {
-                    return (null, new BadRequestObjectResult($"Hora de fin inválida: {rangoHorario.Fin}"));
-                }
-
-                fin = parsed;
-            }
-
-            if (inicio.HasValue && fin.HasValue && inicio >= fin)
-            {
-                return (null, new BadRequestObjectResult("El rango horario es inválido."));
-            }
-        }
-
-        return (new HorarioGenerator.ScheduleFilters(sedesSet, diasSet, inicio, fin), null);
+        return new HorarioGenerator.ScheduleFilters(sedesSet);
     }
 }

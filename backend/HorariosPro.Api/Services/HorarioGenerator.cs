@@ -5,16 +5,18 @@ namespace HorariosPro.Api.Services;
 
 public class HorarioGenerator
 {
-    public List<HorarioResultadoDto> GenerarIndividual(IEnumerable<Curso> cursos, ScheduleFilters filters)
+    public List<HorarioResultadoDto> GenerarIndividual(IEnumerable<Curso> cursos, ScheduleFilters filters, Dictionary<string, BloqueoDiaDto>? bloqueos)
     {
         var cursosList = cursos.ToList();
+        
+        // Filtramos las secciones válidas ANTES de buscar combinaciones (súper rápido)
         var cursoSecciones = cursosList.ToDictionary(
             curso => curso.Nombre,
-            curso => curso.Secciones.Where(seccion => filters.Permite(seccion)).ToList(),
+            curso => curso.Secciones.Where(seccion => filters.Permite(seccion) && SeccionCumpleBloqueos(seccion, bloqueos)).ToList(),
             StringComparer.OrdinalIgnoreCase);
 
         var ordenCursos = cursosList
-            .OrderBy(curso => cursoSecciones[curso.Nombre].Count)
+            .OrderBy(curso => cursoSecciones.TryGetValue(curso.Nombre, out var s) ? s.Count : 0)
             .Select(curso => curso.Nombre)
             .ToList();
 
@@ -29,13 +31,28 @@ public class HorarioGenerator
     public List<HorarioResultadoDto> GenerarGrupal(IEnumerable<Curso> cursos, List<EstudiantePlan> estudiantes, ScheduleFilters filters)
     {
         var cursosList = cursos.ToList();
-        var cursoSecciones = cursosList.ToDictionary(
-            curso => curso.Nombre,
-            curso => curso.Secciones.Where(seccion => filters.Permite(seccion)).ToList(),
-            StringComparer.OrdinalIgnoreCase);
+        var cursoSecciones = new Dictionary<string, List<Seccion>>(StringComparer.OrdinalIgnoreCase);
+
+        // Pre-filtrado inteligente: Si a un estudiante no le sirve la sección por sus bloqueos, la descartamos
+        foreach (var curso in cursosList)
+        {
+            var estudiantesDelCurso = estudiantes.Where(e => e.Cursos.Contains(curso.Nombre)).ToList();
+            var seccionesValidas = curso.Secciones.Where(seccion =>
+            {
+                if (!filters.Permite(seccion)) return false;
+                
+                foreach (var estudiante in estudiantesDelCurso)
+                {
+                    if (!SeccionCumpleBloqueos(seccion, estudiante.Bloqueos)) return false;
+                }
+                return true;
+            }).ToList();
+
+            cursoSecciones[curso.Nombre] = seccionesValidas;
+        }
 
         var cursosOrdenados = cursosList
-            .OrderBy(curso => cursoSecciones[curso.Nombre].Count)
+            .OrderBy(curso => cursoSecciones.TryGetValue(curso.Nombre, out var s) ? s.Count : 0)
             .Select(curso => curso.Nombre)
             .ToList();
 
@@ -45,6 +62,35 @@ public class HorarioGenerator
         BuscarGrupal(cursosOrdenados, cursoSecciones, estudiantes, 0, actual, resultados);
 
         return resultados;
+    }
+
+    // --- NUEVA LÓGICA DE VALIDACIÓN DE BLOQUEOS ---
+    private static bool SeccionCumpleBloqueos(Seccion seccion, Dictionary<string, BloqueoDiaDto>? bloqueos)
+    {
+        if (bloqueos == null || bloqueos.Count == 0) return true;
+
+        foreach (var sesion in seccion.Sesiones)
+        {
+            if (!bloqueos.TryGetValue(sesion.Dia, out var bloqueoDia)) continue;
+
+            if (bloqueoDia.DiaLibre) return false;
+
+            if (bloqueoDia.Rangos != null && bloqueoDia.Rangos.Count > 0)
+            {
+                int inicioSesion = (int)sesion.HoraInicio.TotalMinutes;
+                int finSesion = (int)sesion.HoraFin.TotalMinutes;
+
+                foreach (var rango in bloqueoDia.Rangos)
+                {
+                    // Lógica de colisión en minutos
+                    if (Math.Max(inicioSesion, rango.Min) < Math.Min(finSesion, rango.Max))
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     private static void BuscarIndividual(
@@ -61,18 +107,12 @@ public class HorarioGenerator
         }
 
         var curso = cursos[indice];
-        if (!cursoSecciones.TryGetValue(curso, out var secciones) || secciones.Count == 0)
-        {
-            return;
-        }
+        if (!cursoSecciones.TryGetValue(curso, out var secciones) || secciones.Count == 0) return;
 
         foreach (var seccion in secciones)
         {
             var candidato = new SectionCandidate(curso, seccion);
-            if (TieneColision(candidato, actual))
-            {
-                continue;
-            }
+            if (TieneColision(candidato, actual)) continue;
 
             actual.Add(candidato);
             BuscarIndividual(cursos, cursoSecciones, indice + 1, actual, resultados);
@@ -95,18 +135,12 @@ public class HorarioGenerator
         }
 
         var curso = cursos[indice];
-        if (!cursoSecciones.TryGetValue(curso, out var secciones) || secciones.Count == 0)
-        {
-            return;
-        }
+        if (!cursoSecciones.TryGetValue(curso, out var secciones) || secciones.Count == 0) return;
 
         foreach (var seccion in secciones)
         {
             var candidato = new SectionCandidate(curso, seccion);
-            if (!EsCompatibleConEstudiantes(candidato, actual, estudiantes))
-            {
-                continue;
-            }
+            if (!EsCompatibleConEstudiantes(candidato, actual, estudiantes)) continue;
 
             actual.Add(candidato);
             BuscarGrupal(cursos, cursoSecciones, estudiantes, indice + 1, actual, resultados);
@@ -118,21 +152,14 @@ public class HorarioGenerator
     {
         foreach (var estudiante in estudiantes)
         {
-            if (!estudiante.Cursos.Contains(candidato.Curso))
-            {
-                continue;
-            }
+            if (!estudiante.Cursos.Contains(candidato.Curso)) continue;
 
             var personal = actual
                 .Where(item => estudiante.Cursos.Contains(item.Curso))
                 .ToList();
 
-            if (TieneColision(candidato, personal))
-            {
-                return false;
-            }
+            if (TieneColision(candidato, personal)) return false;
         }
-
         return true;
     }
 
@@ -144,23 +171,16 @@ public class HorarioGenerator
             {
                 foreach (var sesionNueva in candidato.Seccion.Sesiones)
                 {
-                    if (EsColision(sesionActual, sesionNueva))
-                    {
-                        return true;
-                    }
+                    if (EsColision(sesionActual, sesionNueva)) return true;
                 }
             }
         }
-
         return false;
     }
 
     private static bool EsColision(Sesion a, Sesion b)
     {
-        if (!string.Equals(a.Dia, b.Dia, StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
+        if (!string.Equals(a.Dia, b.Dia, StringComparison.OrdinalIgnoreCase)) return false;
 
         var inicio = a.HoraInicio > b.HoraInicio ? a.HoraInicio : b.HoraInicio;
         var fin = a.HoraFin < b.HoraFin ? a.HoraFin : b.HoraFin;
@@ -188,42 +208,18 @@ public class HorarioGenerator
         return new HorarioResultadoDto(items);
     }
 
-    public sealed record ScheduleFilters(
-        HashSet<string> Sedes,
-        HashSet<string> DiasLibres,
-        TimeSpan? RangoInicio,
-        TimeSpan? RangoFin)
+    // Filtros limpios, ya que los bloqueos ahora son manejados aparte
+    public sealed record ScheduleFilters(HashSet<string> Sedes)
     {
         public bool Permite(Seccion seccion)
         {
-            if (Sedes.Count > 0 && !Sedes.Contains(seccion.Sede))
-            {
-                return false;
-            }
-
-            foreach (var sesion in seccion.Sesiones)
-            {
-                if (DiasLibres.Count > 0 && DiasLibres.Contains(sesion.Dia))
-                {
-                    return false;
-                }
-
-                if (RangoInicio.HasValue && sesion.HoraInicio < RangoInicio.Value)
-                {
-                    return false;
-                }
-
-                if (RangoFin.HasValue && sesion.HoraFin > RangoFin.Value)
-                {
-                    return false;
-                }
-            }
-
+            if (Sedes.Count > 0 && !Sedes.Contains(seccion.Sede)) return false;
             return true;
         }
     }
 
-    public sealed record EstudiantePlan(string Nombre, HashSet<string> Cursos);
+    // Le agregamos la propiedad de Bloqueos al estudiante
+    public sealed record EstudiantePlan(string Nombre, HashSet<string> Cursos, Dictionary<string, BloqueoDiaDto>? Bloqueos);
 
     private sealed record SectionCandidate(string Curso, Seccion Seccion);
 }

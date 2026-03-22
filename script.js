@@ -1,5 +1,5 @@
 // --- VARIABLES GLOBALES ---
-const startHour = 7, endHour = 22;
+const startHour = 7, endHour = 23;
 const totalMinutes = (endHour - startHour) * 60;
 const paletaColores = ['#4A90E2', '#E74C3C', '#50E3C2', '#F5A623', '#9B59B6', '#34495E', '#16A085', '#D35400'];
 let colorIndex = 0;
@@ -86,40 +86,108 @@ function escapeHtml(value) {
         .replace(/'/g, '&#039;');
 }
 
-// --- FILTROS AVANZADOS ---
-function seccionCumpleFiltros(sec, diasLibres, minutos_min, minutos_max) {
-    for (const sesion of (sec.sesiones || [])) {
-        if (diasLibres.includes(sesion.dia)) return false;
-        const inicio = parseTime(sesion.inicio);
-        const fin = parseTime(sesion.fin);
-        if (inicio < minutos_min || fin > minutos_max) return false;
+// --- FILTROS AVANZADOS (BLOQUEOS POR DÍA) ---
+const diasSemana = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];
+
+function renderFiltrosBloqueo(containerId, prefijo) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+
+    diasSemana.forEach(dia => {
+        container.innerHTML += `
+            <div class="bloqueo-row" id="row-${prefijo}-${dia}">
+                <div class="bloqueo-dia-label">
+                    <span>${dia}</span>
+                    <label style="font-size: 11px; font-weight: normal; cursor: pointer;">
+                        <input type="checkbox" class="chk-dia-libre-${prefijo}" value="${dia}" onchange="toggleDiaLibre('${prefijo}', '${dia}')"> Libre
+                    </label>
+                </div>
+                <div class="bloqueo-rangos" id="rangos-${prefijo}-${dia}"></div>
+                <button class="btn-add-rango" id="btn-add-${prefijo}-${dia}" onclick="agregarRangoBloqueo('${prefijo}', '${dia}')">+ Rango</button>
+            </div>
+        `;
+    });
+}
+
+function toggleDiaLibre(prefijo, dia) {
+    const isLibre = document.querySelector(`#row-${prefijo}-${dia} .chk-dia-libre-${prefijo}`).checked;
+    const btnAdd = document.getElementById(`btn-add-${prefijo}-${dia}`);
+    const rangosContainer = document.getElementById(`rangos-${prefijo}-${dia}`);
+    
+    if (isLibre) {
+        btnAdd.style.display = 'none';
+        rangosContainer.style.opacity = '0.3';
+        rangosContainer.style.pointerEvents = 'none';
+    } else {
+        btnAdd.style.display = 'block';
+        rangosContainer.style.opacity = '1';
+        rangosContainer.style.pointerEvents = 'auto';
     }
-    return true;
+}
+
+function agregarRangoBloqueo(prefijo, dia) {
+    const container = document.getElementById(`rangos-${prefijo}-${dia}`);
+    const div = document.createElement('div');
+    div.className = 'rango-item';
+    div.innerHTML = `
+        De: <input type="time" class="modern-input-time start-time" value="08:00">
+        A: <input type="time" class="modern-input-time end-time" value="10:00">
+        <button class="btn-delete" onclick="this.parentElement.remove()" style="padding: 4px 8px;">X</button>
+    `;
+    container.appendChild(div);
+}
+
+function leerBloqueos(prefijo) {
+    const bloqueos = {};
+    diasSemana.forEach(dia => {
+        const isLibre = document.querySelector(`#row-${prefijo}-${dia} .chk-dia-libre-${prefijo}`).checked;
+        const rangosHtml = document.querySelectorAll(`#rangos-${prefijo}-${dia} .rango-item`);
+        const rangos = [];
+        
+        rangosHtml.forEach(r => {
+            const min = parseTimeInputToMinutes(r.querySelector('.start-time').value, 0);
+            const max = parseTimeInputToMinutes(r.querySelector('.end-time').value, 0);
+            if (min < max) rangos.push({ min, max });
+        });
+
+        bloqueos[dia] = { diaLibre: isLibre, rangos: rangos };
+    });
+    return bloqueos;
 }
 
 function parseTimeInputToMinutes(timeStr, defaultMinutes) {
     if (!timeStr) return defaultMinutes;
     const parts = timeStr.split(':');
-    if (parts.length < 2) return defaultMinutes;
-    const h = parseInt(parts[0], 10);
-    const m = parseInt(parts[1], 10);
-    if (isNaN(h) || isNaN(m)) return defaultMinutes;
-    return h * 60 + m;
+    return (parseInt(parts[0], 10) * 60) + parseInt(parts[1], 10);
 }
 
-function leerFiltrosInd() {
-    const diasLibres = Array.from(document.querySelectorAll('.chk-dia-libre-ind:checked')).map(cb => cb.value);
-    const minutos_min = parseTimeInputToMinutes(document.getElementById('hora-min-ind').value, startHour * 60);
-    const minutos_max = parseTimeInputToMinutes(document.getElementById('hora-max-ind').value, endHour * 60);
-    return { diasLibres, minutos_min, minutos_max };
+function seccionCumpleFiltros(sec, bloqueos) {
+    for (const sesion of (sec.sesiones || [])) {
+        const bloqueoDia = bloqueos[sesion.dia];
+        if (!bloqueoDia) continue; // Si no hay reglas para este día, pasa
+
+        if (bloqueoDia.diaLibre) return false; // El día completo está bloqueado
+
+        const inicioSesion = parseTime(sesion.inicio);
+        const finSesion = parseTime(sesion.fin);
+
+        for (const rango of bloqueoDia.rangos) {
+            // Lógica de colisión: Max de los inicios < Min de los fines
+            if (Math.max(inicioSesion, rango.min) < Math.min(finSesion, rango.max)) {
+                return false; // Choca con un rango de bloqueo
+            }
+        }
+    }
+    return true;
 }
 
-function leerFiltrosGrp() {
-    const diasLibres = Array.from(document.querySelectorAll('.chk-dia-libre-grp:checked')).map(cb => cb.value);
-    const minutos_min = parseTimeInputToMinutes(document.getElementById('hora-min-grp').value, startHour * 60);
-    const minutos_max = parseTimeInputToMinutes(document.getElementById('hora-max-grp').value, endHour * 60);
-    return { diasLibres, minutos_min, minutos_max };
-}
+// Inicializar la UI al cargar
+document.addEventListener('DOMContentLoaded', () => {
+    renderFiltrosBloqueo('filtros-ind-container', 'ind');
+    cargarCatalogoDesdeApi();
+    cargarCursosServidor();
+});
 
 // --- CATALOGO API ---
 async function cargarCatalogoDesdeApi() {
@@ -236,7 +304,7 @@ async function procesarArchivosInd(event) {
 async function iniciarGeneracionInd() {
     const cursosReq = Array.from(document.querySelectorAll('.chk-curso:checked')).map(cb => cb.value);
     const sedesReq = Array.from(document.querySelectorAll('.chk-sede:checked')).map(cb => cb.value);
-    const { diasLibres, minutos_min, minutos_max } = leerFiltrosInd();
+    const bloqueosInd = leerBloqueos('ind');
     horariosInd = [];
     document.getElementById('error-msg').innerText = '';
 
@@ -250,7 +318,7 @@ async function iniciarGeneracionInd() {
         if (!horariosApi) return;
 
         horariosInd = horariosApi.filter(schedule =>
-            schedule.every(sec => seccionCumpleFiltros(sec, diasLibres, minutos_min, minutos_max))
+            schedule.every(sec => seccionCumpleFiltros(sec, bloqueosInd))
         );
         if (horariosInd.length === 0) {
             document.getElementById('error-msg').innerText = "No se encontró ninguna combinación posible. Intenta quitar cursos que se crucen o selecciona más sedes.";
@@ -273,7 +341,7 @@ async function iniciarGeneracionInd() {
         let curso = cursosReq[idx];
         for (let sec of (cursosDataInd[curso] || [])) {
             if (!sedesReq.includes(sec.sede)) continue;
-            if (!seccionCumpleFiltros(sec, diasLibres, minutos_min, minutos_max)) continue;
+            if (!seccionCumpleFiltros(sec, bloqueosInd)) continue;
             if (!choca(actual, sec)) {
                 actual.push({ ...sec, curso: curso });
                 buscar(idx + 1, actual);
@@ -298,12 +366,12 @@ async function iniciarGeneracionInd() {
     cambiarPantalla('screen-calendar');
 }
 
-async function solicitarHorariosIndividualApi(cursosReq, sedesReq) {
+async function solicitarHorariosIndividualApi(cursosReq, sedesReq, bloqueosReq) {
     try {
         const response = await fetch(`${API_BASE_URL}/api/horarios/individual`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ cursos: cursosReq, sedes: sedesReq })
+            body: JSON.stringify({ cursos: cursosReq, sedes: sedesReq, bloqueos: bloqueosReq })
         });
 
         if (!response.ok) {
@@ -323,6 +391,92 @@ async function solicitarHorariosIndividualApi(cursosReq, sedesReq) {
         console.error(error);
         document.getElementById('error-msg').innerText = 'No se pudo conectar con el servidor.';
         return null;
+    }
+}
+
+async function iniciarGeneracionInd() {
+    const btn = document.getElementById('btn-generar');
+    const errorMsg = document.getElementById('error-msg');
+    
+    const cursosReq = Array.from(document.querySelectorAll('.chk-curso:checked')).map(cb => cb.value);
+    const sedesReq = Array.from(document.querySelectorAll('.chk-sede:checked')).map(cb => cb.value);
+    const bloqueosInd = leerBloqueos('ind');
+    horariosInd = [];
+    errorMsg.innerText = '';
+
+    if (cursosReq.length === 0) {
+        errorMsg.innerText = 'Selecciona al menos un curso.';
+        return;
+    }
+
+    // LÍMITE DE SEGURIDAD PARA EVITAR CONGELAMIENTOS
+    if (cursosReq.length > 8) {
+        errorMsg.innerText = 'Por favor, selecciona un máximo de 8 cursos para evitar sobrecargar el navegador.';
+        return;
+    }
+
+    // ESTADO VISUAL DE CARGA
+    btn.innerText = 'Generando... ⏳';
+    btn.disabled = true;
+
+    try {
+        if (origenDatosInd === 'api' && catalogoDisponible) {
+            // Pasamos los bloqueos a la API
+            const horariosApi = await solicitarHorariosIndividualApi(cursosReq, sedesReq, bloqueosInd);
+            if (!horariosApi) return;
+
+            // El servidor ya filtró todo, solo asignamos los resultados
+            horariosInd = horariosApi;
+            
+            if (horariosInd.length === 0) {
+                errorMsg.innerText = "No se encontró ninguna combinación posible.";
+                return;
+            }
+
+            isGroupMode = false;
+            schedulesList = horariosInd;
+            prepararCalendario('Individuales', 'screen-setup');
+            cambiarPantalla('screen-calendar');
+            return;
+        }
+        
+        // --- BÚSQUEDA LOCAL (Si usas JSON directamente) ---
+        function choca(horario, nuevaSec) {
+            return horario.some(sec => sec.sesiones.some(s1 => nuevaSec.sesiones.some(s2 => hayColision(s1, s2))));
+        }
+
+        function buscar(idx, actual) {
+            if (idx === cursosReq.length) { horariosInd.push([...actual]); return; }
+            let curso = cursosReq[idx];
+            for (let sec of (cursosDataInd[curso] || [])) {
+                if (!sedesReq.includes(sec.sede)) continue;
+                if (!seccionCumpleFiltros(sec, bloqueosInd)) continue;
+                if (!choca(actual, sec)) {
+                    actual.push({ ...sec, curso: curso });
+                    buscar(idx + 1, actual);
+                    actual.pop();
+                }
+            }
+        }
+        
+        // Damos un respiro de 50ms para que el navegador dibuje el botón de "Generando..."
+        await new Promise(resolve => setTimeout(resolve, 50));
+        buscar(0, []);
+        
+        if (horariosInd.length === 0) {
+            errorMsg.innerText = "No se encontró ninguna combinación posible.";
+            return; 
+        }
+
+        isGroupMode = false;
+        schedulesList = horariosInd;
+        prepararCalendario('Individuales', 'screen-setup');
+        cambiarPantalla('screen-calendar');
+
+    } finally {
+        // RESTAURAMOS EL BOTÓN PASE LO QUE PASE
+        btn.innerText = 'Generar Horarios';
+        btn.disabled = false;
     }
 }
 
@@ -384,14 +538,14 @@ function generarTarjetasAlumnos() {
     groupStudents = [];
     const usarCatalogo = catalogoDisponible && modoCargaGrupo !== 'archivos';
     if (!usarCatalogo) {
-        sedesGrpGlobales.clear(); // Limpiamos sedes previas si no hay catálogo
+        sedesGrpGlobales.clear(); 
     }
     document.getElementById('group-filters-section').style.display = 'none';
     const cards = [];
     origenDatosGrp = usarCatalogo ? 'api' : 'archivos';
 
     for (let i = 0; i < n; i++) {
-        groupStudents.push({ name: `Alumno ${i+1}`, courses: [], data: {} });
+        groupStudents.push({ name: `Alumno ${i+1}`, courses: [], data: {}, bloqueos: {} });
         const cursosHtml = usarCatalogo
             ? (catalogoCursos.length === 0
                 ? '<div style="flex:2; color:#999; font-size:12px;">No hay cursos disponibles.</div>'
@@ -410,22 +564,34 @@ function generarTarjetasAlumnos() {
                     
                     <p style="margin: 0; color: var(--primary); font-weight: bold;">📂 Clic o Arrastra JSONs</p>
                     <small style="color: #7f8c8d; margin-top: 5px;">Archivos de este alumno</small>
-                    
                     <input type="file" id="file-input-grp-${i}" multiple accept=".json" style="display:none;" onchange="readStudentFiles(event, ${i})">
                 </div>`;
 
+        // Modificamos el diseño de la tarjeta para que incluya los bloqueos debajo
         cards.push(`
-            <div class="student-card">
-                <div class="student-info">
-                    <label style="font-weight:bold; color: #2c3e50;">Nombre:</label>
-                    <input type="text" value="Alumno ${i+1}" onchange="groupStudents[${i}].name = this.value" style="margin-bottom: 10px;">
-                    <div id="stu-courses-${i}" class="student-courses-list">Cursos: 0 seleccionados</div>
+            <div class="student-card" style="flex-direction: column;">
+                <div style="display: flex; gap: 20px; width: 100%; align-items: flex-start;">
+                    <div class="student-info">
+                        <label style="font-weight:bold; color: #2c3e50;">Nombre:</label>
+                        <input type="text" value="Alumno ${i+1}" onchange="groupStudents[${i}].name = this.value; document.getElementById('label-bloqueo-${i}').innerText = 'Bloqueos de ' + this.value;" style="margin-bottom: 10px;">
+                        <div id="stu-courses-${i}" class="student-courses-list">Cursos: 0 seleccionados</div>
+                    </div>
+                    ${cursosHtml}
                 </div>
-                ${cursosHtml}
+                <div style="width: 100%; margin-top: 15px; border-top: 1px solid #e1e8ed; padding-top: 15px;">
+                    <strong id="label-bloqueo-${i}" style="font-size: 13px; color: #2c3e50;">Bloqueos de Alumno ${i+1}:</strong>
+                    <div id="filtros-grp-stu-${i}" class="bloqueos-container" style="margin-top: 10px;"></div>
+                </div>
             </div>`);
     }
     cont.innerHTML = cards.join('');
     document.getElementById('btn-generar-grupo').style.display = 'block';
+    
+    // Renderizamos los filtros dinámicos para cada alumno
+    for (let i = 0; i < n; i++) {
+        renderFiltrosBloqueo(`filtros-grp-stu-${i}`, `grp-stu-${i}`);
+    }
+
     if (usarCatalogo) {
         actualizarFiltrosGrupales();
         cont.querySelectorAll('.chk-curso-grp').forEach(input => {
@@ -527,9 +693,12 @@ function actualizarFiltrosGrupales() {
 async function iniciarGeneracionGrupal() {
     document.getElementById('error-msg-group').innerText = '';
 
-    // Obtener filtros seleccionados
     const sedesPermitidas = Array.from(document.querySelectorAll('.chk-sede-grp:checked')).map(cb => cb.value);
-    const { diasLibres: diasLibresGrp, minutos_min: minGrp, minutos_max: maxGrp } = leerFiltrosGrp();
+    
+    // 1. Leer los bloqueos de cada alumno individualmente
+    groupStudents.forEach((stu, i) => {
+        stu.bloqueos = leerBloqueos(`grp-stu-${i}`);
+    });
 
     if (sedesPermitidas.length === 0) {
         document.getElementById('error-msg-group').innerText = "Debes seleccionar al menos una sede permitida en los filtros grupales.";
@@ -548,19 +717,28 @@ async function iniciarGeneracionGrupal() {
     if (usarApi) {
         const payloadEstudiantes = groupStudents.map(stu => ({
             nombre: stu.name,
-            cursos: stu.courses
+            cursos: stu.courses,
+            bloqueos: stu.bloqueos // Ahora el API recibirá los bloqueos personales
         }));
 
         const horariosApi = await solicitarHorariosGrupalesApi(payloadEstudiantes, sedesPermitidas);
         if (!horariosApi) return;
+        
+        // Filtrar respuesta de la API usando reglas individuales
         horariosGrp = horariosApi.filter(schedule =>
-            schedule.every(sec => seccionCumpleFiltros(sec, diasLibresGrp, minGrp, maxGrp))
+            schedule.every(sec => {
+                for (let stu of groupStudents) {
+                    if (stu.courses.includes(sec.curso)) {
+                        if (!seccionCumpleFiltros(sec, stu.bloqueos)) return false;
+                    }
+                }
+                return true;
+            })
         );
     } else {
         let globalCoursesSet = new Set();
         let globalData = {};
 
-        // Fusionar todos los cursos requeridos
         groupStudents.forEach(stu => {
             stu.courses.forEach(c => {
                 globalCoursesSet.add(c);
@@ -577,14 +755,21 @@ async function iniciarGeneracionGrupal() {
             let sections = globalData[courseName] || [];
 
             for (let sec of sections) {
-                // APLICAMOS EL FILTRO GRUPAL: Si la sede no está permitida, descartar
                 if (!sedesPermitidas.includes(sec.sede)) continue;
-                if (!seccionCumpleFiltros(sec, diasLibresGrp, minGrp, maxGrp)) continue;
-
+                
+                // 2. APLICAMOS EL FILTRO INDIVIDUAL: ¿Le sirve esta sección a todos los que llevan el curso?
+                let cumpleBloqueos = true;
                 let isValidForAll = true;
 
                 for (let stu of groupStudents) {
                     if (stu.courses.includes(courseName)) {
+                        // Verifica los bloqueos de tiempo del alumno
+                        if (!seccionCumpleFiltros(sec, stu.bloqueos)) {
+                            cumpleBloqueos = false;
+                            break;
+                        }
+
+                        // Verifica cruces con su horario ya armado
                         let personalSchedule = actualSchedule.filter(s => stu.courses.includes(s.curso));
                         let choca = personalSchedule.some(existente =>
                             existente.sesiones.some(s1 => sec.sesiones.some(s2 => hayColision(s1, s2)))
@@ -594,7 +779,7 @@ async function iniciarGeneracionGrupal() {
                     }
                 }
 
-                if (isValidForAll) {
+                if (cumpleBloqueos && isValidForAll) {
                     actualSchedule.push({ ...sec, curso: courseName });
                     buscarGrp(idx + 1, actualSchedule);
                     actualSchedule.pop();
@@ -605,10 +790,9 @@ async function iniciarGeneracionGrupal() {
         buscarGrp(0, []);
     }
 
-    // --- NUEVA VALIDACIÓN DE RESULTADOS VACÍOS ---
     if (horariosGrp.length === 0) {
-        document.getElementById('error-msg-group').innerText = "No se encontró ninguna combinación grupal sin cruces. Intenten flexibilizar las sedes o quitar algún curso conflictivo.";
-        return; // Detiene el código, no cambia de pantalla
+        document.getElementById('error-msg-group').innerText = "No se encontró ninguna combinación grupal sin cruces. Intenten flexibilizar las sedes, los bloqueos de horas o quitar cursos conflictivos.";
+        return;
     }
 
     horariosGrp.forEach(schedule => {
@@ -1164,8 +1348,3 @@ function descargarJSON() {
     
     URL.revokeObjectURL(url);
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    cargarCatalogoDesdeApi();
-    cargarCursosServidor();
-});
