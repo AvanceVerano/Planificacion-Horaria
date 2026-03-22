@@ -10,6 +10,7 @@ namespace HorariosPro.Api.Controllers;
 
 [ApiController]
 [Route("api/admin/cursos")]
+[ValidarTokenAdmin]
 public class AdminCursosController : ControllerBase
 {
     private readonly HorariosProDbContext _dbContext;
@@ -104,11 +105,9 @@ public class AdminCursosController : ControllerBase
     }
 
     [HttpGet("validate")]
-    [AdminAuth]
     public IActionResult Validate() => Ok();
 
     [HttpPost("upload-json")]
-    [AdminAuth]
     public async Task<ActionResult<CursoDto>> UploadJson([FromBody] CursoUploadRequest request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request.Nombre))

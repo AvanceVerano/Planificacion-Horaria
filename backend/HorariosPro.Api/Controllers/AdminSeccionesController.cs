@@ -1,5 +1,6 @@
 using HorariosPro.Api.Contracts;
 using HorariosPro.Api.Data;
+using HorariosPro.Api.Filters;
 using HorariosPro.Api.Models;
 using HorariosPro.Api.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,7 @@ namespace HorariosPro.Api.Controllers;
 
 [ApiController]
 [Route("api/admin/secciones")]
+[ValidarTokenAdmin]
 public class AdminSeccionesController : ControllerBase
 {
     private readonly HorariosProDbContext _dbContext;
