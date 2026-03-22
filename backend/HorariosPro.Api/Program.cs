@@ -4,7 +4,6 @@ using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 builder.Services.AddScoped<HorariosPro.Api.Services.HorarioGenerator>();
 builder.Services.AddEndpointsApiExplorer();
@@ -66,7 +65,6 @@ app.UseCors("AllowVercel");
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
