@@ -114,6 +114,22 @@
                 </div>
         </div>
 
+        <div id="interactive-builder-tray" style="display: none; padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ddd;">
+            <h3 style="margin-top: 0; font-size: 16px; color: #2c3e50;">Arma tu horario (Haz clic en un curso para ver opciones)</h3>
+            
+            <div id="tray-courses" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+                </div>
+
+            <div id="preview-instructions" style="display: none; padding: 10px; border-radius: 6px; margin-bottom: 10px;">
+                <span id="preview-text"></span>
+                <button class="btn-secondary" style="margin-left: 10px; padding: 3px 8px; font-size: 12px; background-color: #fff; color: #333;" onclick="cancelarPreview()">❌ Cancelar Selección</button>
+            </div>
+
+            <div style="text-align: right; margin-top: 15px;">
+                <button id="btn-save-interactive-fav" class="btn-main" style="display: none;" onclick="guardarHorarioInteractivoComoFav()">⭐ Guardar Horario Completo</button>
+            </div>
+        </div>
+
         <div class="calendar-container">
             <div class="time-col">
                 <div class="day-header">Hora</div>
