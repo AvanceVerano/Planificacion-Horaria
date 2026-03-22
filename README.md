@@ -16,6 +16,16 @@ Una aplicación web pura (HTML/CSS/JS) diseñada para resolver el problema de sa
 * **Algoritmia:** Búsqueda en Profundidad (DFS) y Backtracking para la evaluación de colisiones temporales y filtrado de ramas inválidas.
 * **Formatos:** JSON para la persistencia y transferencia de datos de los cursos.
 
+## 🧪 Entorno moderno (Vue 3 + Vite)
+
+La carpeta `frontend/` contiene la base Vue 3 (Composition API) con Pinia y PrimeVue, manteniendo los archivos originales en la raíz como fuente de verdad. Para ejecutar la versión moderna:
+
+1. `cd frontend`
+2. `npm install`
+3. `npm run dev`
+
+Para generar un build de producción: `npm run build`.
+
 ## 🚀 Cómo Usarlo
 
 1.  Clona el repositorio o descarga los archivos.

@@ -1,4 +1,58 @@
-// --- VARIABLES GLOBALES ---
+// --- INLINE SVG ICONS (Lucide, stroke-width 1.5) ---
+const SVG_CHECK   = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg>`;
+const SVG_EYE     = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+const SVG_PLUS    = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
+const SVG_STAR_ON = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+const SVG_STAR_OFF= `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+const SVG_FOLDER  = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`;
+// Block-level icons (12 px, used inside calendar class-blocks)
+const SVG_MONITOR  = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`;
+const SVG_BUILDING = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>`;
+const SVG_MAP_PIN  = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
+const SVG_USER_SM  = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+const SVG_WARNING  = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+const SVG_CLICK    = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><path d="m4 4 7.07 17 2.51-7.39L21 11.07z"/></svg>`;
+// Modal alert icons (24 px, used inside the custom alert modal)
+const SVG_ALERT_CHECK   = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+const SVG_ALERT_XCIRCLE = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
+const SVG_ALERT_WARN    = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+const SVG_ALERT_INFO    = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+// Inline status icons (15 px, used in admin status messages)
+const SVG_STATUS_OK   = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+const SVG_STATUS_ERR  = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
+const SVG_STATUS_WAIT = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+
+// --- CUSTOM ALERT MODAL ---
+function showAlert(message, type = 'info') {
+    const modal   = document.getElementById('modal-alert');
+    const titleEl = document.getElementById('modal-alert-title');
+    const msgEl   = document.getElementById('modal-alert-msg');
+    const iconEl  = document.getElementById('modal-alert-icon');
+    if (!modal) { console.warn(message); return; }
+
+    const configs = {
+        success: { title: 'Éxito',       svg: SVG_ALERT_CHECK,   cls: 'type-success' },
+        error:   { title: 'Error',        svg: SVG_ALERT_XCIRCLE, cls: 'type-error'   },
+        warning: { title: 'Advertencia',  svg: SVG_ALERT_WARN,    cls: 'type-warning' },
+        info:    { title: 'Información',  svg: SVG_ALERT_INFO,    cls: 'type-info'    },
+    };
+    const cfg = configs[type] || configs.info;
+    iconEl.className = `modal-alert-icon ${cfg.cls}`;
+    iconEl.innerHTML = cfg.svg;
+    titleEl.textContent = cfg.title;
+    msgEl.textContent = message;
+    modal.classList.add('active');
+}
+function closeAlert() {
+    const modal = document.getElementById('modal-alert');
+    if (modal) modal.classList.remove('active');
+}
+function setAdminStatus(el, msg, type = 'error') {
+    const colors  = { success: '#2e7d32', error: '#c62828', loading: '#e65100' };
+    const icons   = { success: SVG_STATUS_OK, error: SVG_STATUS_ERR, loading: SVG_STATUS_WAIT };
+    el.style.color = colors[type] || colors.error;
+    el.innerHTML   = `<span style="display:inline-flex;align-items:center;gap:6px;">${icons[type] || SVG_STATUS_ERR} ${msg}</span>`;
+}
 const startHour = 7, endHour = 23;
 const totalMinutes = (endHour - startHour) * 60;
 const paletaColores = ['#4A90E2', '#E74C3C', '#50E3C2', '#F5A623', '#9B59B6', '#34495E', '#16A085', '#D35400'];
@@ -447,15 +501,15 @@ function actualizarBandejaInteractiva() {
         
         if (seccionAsignada) {
             container.innerHTML += `
-                <div style="background: #27ae60; color: white; padding: 8px 15px; border-radius: 20px; font-size: 14px; display: flex; align-items: center; gap: 8px;">
-                    ✅ ${curso} (${seccionAsignada.seccion})
-                    <button onclick="quitarSeccionInteractiva('${curso}')" style="background: none; border: none; color: white; cursor: pointer; font-weight: bold;">X</button>
+                <div style="background: var(--primary); color: white; padding: 8px 15px; border-radius: var(--radius-pill, 999px); font-size: 14px; display: flex; align-items: center; gap: 8px; font-family: 'Public Sans', sans-serif; font-weight: 600;">
+                    ${SVG_CHECK} ${curso} (${seccionAsignada.seccion})
+                    <button onclick="quitarSeccionInteractiva('${curso}')" style="background: none; border: none; color: white; cursor: pointer; font-weight: bold; display: flex; align-items: center;">✕</button>
                 </div>`;
         } else {
             // Si el curso es el que estamos previsualizando, lo pintamos oscuro
             const isPreview = (curso === cursoPreviewActual);
-            const btnStyle = isPreview ? 'background-color: #34495e; color: white;' : '';
-            const btnText = isPreview ? `👀 Viendo ${curso}` : `➕ Asignar ${curso}`;
+            const btnStyle = isPreview ? 'background-color: var(--icon, #4A3B33); color: white;' : '';
+            const btnText = isPreview ? `${SVG_EYE} Viendo ${curso}` : `${SVG_PLUS} Asignar ${curso}`;
 
             container.innerHTML += `
                 <button class="btn-secondary" style="border-radius: 20px; ${btnStyle}" onclick="mostrarOpcionesSecciones('${curso}')">
@@ -619,31 +673,31 @@ function dibujarBloqueUnicoInteligente(ses, dia, width, left) {
     const topP = ((parseTime(ses.inicio) - startHour * 60) / totalMinutes) * 100;
     const hP = ((parseTime(ses.fin) - parseTime(ses.inicio)) / totalMinutes) * 100;
 
-    const icon = cursoData.sede.toLowerCase().includes('virtual') ? '💻' : '🏫';
+    const icon = cursoData.sede.toLowerCase().includes('virtual') ? SVG_MONITOR : SVG_BUILDING;
     let borderStyle, hoverEffect, textoSedeHover;
 
     if (esPreview) {
         if (tieneChoque) {
             borderStyle = 'border: 2px dashed #e74c3c; opacity: 0.95; cursor: pointer; transition: 0.2s;';
             hoverEffect = `onmouseover="this.style.transform='scale(1.02)'; this.style.backgroundColor='#f5b7b1'; this.style.zIndex='999';" onmouseout="this.style.transform='scale(1)'; this.style.backgroundColor='${colorHex}'; this.style.zIndex='${zIndexBase}';"`;
-            textoSedeHover = `<div style="font-size: 10px; color: #c0392b; line-height: 1.1;">⚠️ Cruza con: <br>${cursoData.chocaCon.join(', ')}</div>`;
+            textoSedeHover = `<div style="display:flex; align-items:center; gap:3px; font-size: 10px; color: #c0392b; line-height: 1.1;">${SVG_WARNING} Cruza con: <br>${cursoData.chocaCon.join(', ')}</div>`;
         } else {
             borderStyle = 'border: 2px dashed #7f8c8d; opacity: 0.95; cursor: pointer; transition: 0.2s;';
             hoverEffect = `onmouseover="this.style.transform='scale(1.02)'; this.style.backgroundColor='#aab7b8'; this.style.zIndex='999';" onmouseout="this.style.transform='scale(1)'; this.style.backgroundColor='${colorHex}'; this.style.zIndex='${zIndexBase}';"`;
-            textoSedeHover = `<div style="font-size: 10px; color: #333;">👉 Clic para elegir</div>`;
+            textoSedeHover = `<div style="display:flex; align-items:center; gap:3px; font-size: 10px; color: #333;">${SVG_CLICK} Clic para elegir</div>`;
         }
     } else {
         borderStyle = 'border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 2px 4px rgba(0,0,0,0.1);';
         hoverEffect = '';
-        textoSedeHover = `👨‍🏫 ${cursoData.profesor || 'Sin profesor'}`;
+        textoSedeHover = `<span style="display:inline-flex; align-items:center; gap:3px;">${SVG_USER_SM} ${cursoData.profesor || 'Sin profesor'}</span>`;
     }
 
     const clickAction = esPreview ? `onclick="elegirSeccionInteractiva('${cursoData.curso}', '${cursoData.seccion}')"` : '';
 
     // Etiqueta destacada de Sede
     const etiquetaSede = `
-        <div style="background: rgba(255,255,255,0.9); color: #2c3e50; padding: 2px 4px; border-radius: 4px; font-size: 10px; font-weight: bold; display: inline-block; margin-bottom: 2px; border: 1px solid #ccc;">
-            📍 <span style="text-transform: capitalize;">${cursoData.sede}</span>
+        <div style="background: rgba(255,255,255,0.9); color: #2c3e50; padding: 2px 4px; border-radius: 4px; font-size: 10px; font-weight: bold; display: inline-flex; align-items: center; gap: 3px; margin-bottom: 2px; border: 1px solid #ccc;">
+            ${SVG_MAP_PIN} <span style="text-transform: capitalize;">${cursoData.sede}</span>
         </div>`;
 
     grid.innerHTML += `
@@ -668,7 +722,7 @@ function dibujarBloqueUnicoInteligente(ses, dia, width, left) {
 function guardarHorarioInteractivoComoFav() {
     favsInd.push([...horarioInteractivoActual]);
     document.getElementById('fav-ind-status').innerText = `${favsInd.length} guardados`;
-    alert("¡Horario guardado en tus Favoritos! ⭐\nPuedes ir a la pestaña Favoritos para descargarlo.");
+    showAlert("¡Horario guardado en tus Favoritos!\nPuedes ir a la pestaña Favoritos para descargarlo.", 'success');
 }
 
 async function solicitarHorariosGrupalesApi(estudiantes, sedesPermitidas) {
@@ -753,7 +807,7 @@ function generarTarjetasAlumnos() {
                      ondrop="dropStudentFiles(event, ${i})" 
                      onclick="document.getElementById('file-input-grp-${i}').click()">
                     
-                    <p style="margin: 0; color: var(--primary); font-weight: bold;">📂 Clic o Arrastra JSONs</p>
+                    <p style="margin: 0; color: var(--primary); font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Public Sans', sans-serif;">${SVG_FOLDER} Clic o Arrastra JSONs</p>
                     <small style="color: #7f8c8d; margin-top: 5px;">Archivos de este alumno</small>
                     <input type="file" id="file-input-grp-${i}" multiple accept=".json" style="display:none;" onchange="readStudentFiles(event, ${i})">
                 </div>`;
@@ -858,7 +912,7 @@ async function readStudentFiles(event, index) {
             // Recopilamos las sedes globalmente
             json.forEach(sec => sedesGrpGlobales.add(sec.sede));
         } catch (e) {
-            alert(`Error al leer ${f.name} en el alumno ${index + 1}.`);
+            showAlert(`Error al leer ${f.name} en el alumno ${index + 1}.`, 'error');
         }
     }
     
@@ -1035,13 +1089,13 @@ function actualizarBotonFavorito() {
     const targetArr = isGroupMode ? favsGrp : favsInd;
     const isFav = targetArr.some(f => JSON.stringify(f) === JSON.stringify(schedulesList[currentIndex]));
     const btn = document.getElementById('btn-fav');
-    if (isFav) { btn.innerHTML = '⭐ Guardado'; btn.classList.add('active'); } 
-    else { btn.innerHTML = '☆ Favorito'; btn.classList.remove('active'); }
+    if (isFav) { btn.innerHTML = `${SVG_STAR_ON} Guardado`; btn.classList.add('active'); } 
+    else { btn.innerHTML = `${SVG_STAR_OFF} Favorito`; btn.classList.remove('active'); }
 }
 
 function descargarFavs(tipo) {
     const arr = tipo === 'ind' ? favsInd : favsGrp;
-    if (arr.length === 0) return alert("Nada que descargar.");
+    if (arr.length === 0) { showAlert("Nada que descargar.", 'warning'); return; }
     const url = URL.createObjectURL(new Blob([JSON.stringify(arr, null, 4)], {type:"application/json"}));
     const a = document.createElement("a"); a.href = url; a.download = `favoritos_${tipo}.json`; a.click();
 }
@@ -1051,7 +1105,7 @@ async function cargarFavs(event, tipo) {
         const json = JSON.parse(await event.target.files[0].text());
         if (tipo === 'ind') { favsInd = json; document.getElementById('fav-ind-status').innerText = `${json.length} guardados`; }
         else { favsGrp = json; document.getElementById('fav-grp-status').innerText = `${json.length} guardados`; }
-    } catch(e) { alert("Error al cargar JSON."); }
+    } catch(e) { showAlert("Error al cargar JSON.", 'error'); }
 }
 
 function verFavoritos(tipo) {
@@ -1145,7 +1199,7 @@ function renderSchedule(index) {
 
     scheduleToRender.forEach((curso, idx) => {
         const color = obtenerColorCurso(curso.curso);
-        const icon = curso.sede.toLowerCase().includes('virtual') ? '💻' : '🏫';
+        const icon = curso.sede.toLowerCase().includes('virtual') ? SVG_MONITOR : SVG_BUILDING;
         const prof = curso.profesor || 'Sin profesor';
 
         // Badges de alumnos (solo en Mapa General)
@@ -1165,7 +1219,7 @@ function renderSchedule(index) {
             grid.innerHTML += `
                 <div class="class-block" style="top:${topP}%; height:${hP}%; background-color:${color}; z-index:${idx};">
                     <div class="class-title"><span>${curso.curso}</span><span class="icon" title="${curso.sede}">${icon}</span></div>
-                    <div class="class-prof">👨‍🏫 ${prof}</div>
+                    <div class="class-prof" style="display:flex; align-items:center; gap:3px;">${SVG_USER_SM} ${prof}</div>
                     ${badgesHtml}
                     <div class="class-details"><strong>${curso.seccion}</strong> - ${curso.sede}<br>${sesion.inicio} a ${sesion.fin}</div>
                 </div>`;
@@ -1424,7 +1478,7 @@ async function cargarJsonParaEditar(event) {
         
         // Validar que el archivo sea una lista (array)
         if (!Array.isArray(json)) {
-            alert("El archivo no tiene el formato correcto. Debe ser una lista de secciones.");
+            showAlert("El archivo no tiene el formato correcto. Debe ser una lista de secciones.", 'error');
             event.target.value = ''; 
             return;
         }
@@ -1445,7 +1499,7 @@ async function cargarJsonParaEditar(event) {
 
     } catch (e) {
         console.error(e);
-        alert("Error al leer el archivo JSON. Verifica que no esté corrupto.");
+        showAlert("Error al leer el archivo JSON. Verifica que no esté corrupto.", 'error');
     }
     
     event.target.value = ''; // Resetear el input
@@ -1534,7 +1588,7 @@ function guardarSesion() {
     const inicio = document.getElementById('modal-inicio').value;
     const fin = document.getElementById('modal-fin').value;
 
-    if (!inicio || !fin) { alert("Llena las horas de inicio y fin."); return; }
+    if (!inicio || !fin) { showAlert("Llena las horas de inicio y fin.", 'warning'); return; }
 
     editorData[currentTargetSectionIndex].sesiones.push({ dia, inicio, fin });
     cerrarModal();
@@ -1546,8 +1600,8 @@ function descargarJSON() {
     
     // Validar secciones vacías
     for (let sec of editorData) {
-        if (!sec.seccion) { alert("Asegúrate de que todas las secciones tengan un Código."); return; }
-        if (sec.sesiones.length === 0) { alert(`La sección ${sec.seccion} no tiene horarios.`); return; }
+        if (!sec.seccion) { showAlert("Asegúrate de que todas las secciones tengan un Código.", 'warning'); return; }
+        if (sec.sesiones.length === 0) { showAlert(`La sección ${sec.seccion} no tiene horarios.`, 'warning'); return; }
     }
 
     const dataStr = JSON.stringify(editorData, null, 4);
@@ -1575,7 +1629,7 @@ function enviarPorCorreo() {
     window.open(`mailto:${ADMIN_EMAIL}?subject=${asunto}&body=${cuerpo}`, '_self');
     
     // 4. Le avisamos al usuario que debe adjuntar el archivo manualmente
-    alert("Se ha abierto tu aplicación de correo. \n\n¡IMPORTANTE! No olvides ADJUNTAR el archivo .json que descargaste antes de enviar el correo.");
+    showAlert("Se ha abierto tu aplicación de correo.\n\n¡IMPORTANTE! No olvides ADJUNTAR el archivo .json que descargaste antes de enviar el correo.", 'info');
 }
 
 async function hashSHA256(texto) {
@@ -1593,13 +1647,11 @@ async function validarYMostrarPanelAdmin() {
     const panelLogin = document.getElementById('admin-login-section');
 
     if (!password) { 
-        statusEl.textContent = '❌ Ingresa la clave de administrador.'; 
-        statusEl.style.color = '#e74c3c';
+        setAdminStatus(statusEl, 'Ingresa la clave de administrador.', 'error');
         return; 
     }
 
-    statusEl.textContent = '⏳ Validando clave con el servidor...';
-    statusEl.style.color = '#f39c12';
+    setAdminStatus(statusEl, 'Validando clave con el servidor...', 'loading');
 
     try {
         const token = await hashSHA256(password);
@@ -1611,15 +1663,13 @@ async function validarYMostrarPanelAdmin() {
         });
 
         if (respuesta.status === 401) {
-            statusEl.textContent = '❌ Clave incorrecta. Acceso denegado.';
-            statusEl.style.color = '#e74c3c';
+            setAdminStatus(statusEl, 'Clave incorrecta. Acceso denegado.', 'error');
             panelAdmin.style.display = 'none';
             return;
         }
         
         if (!respuesta.ok) {
-            statusEl.textContent = '❌ Error al comunicarse con la base de datos.';
-            statusEl.style.color = '#e74c3c';
+            setAdminStatus(statusEl, 'Error al comunicarse con la base de datos.', 'error');
             return;
         }
 
@@ -1639,8 +1689,7 @@ async function validarYMostrarPanelAdmin() {
         }
 
     } catch (err) {
-        statusEl.textContent = `❌ Error de conexión: ${err.message}`;
-        statusEl.style.color = '#e74c3c';
+        setAdminStatus(statusEl, `Error de conexión: ${err.message}`, 'error');
     }
 }
 
@@ -1650,12 +1699,12 @@ async function subirJsonOficial(event) {
 
     const statusEl = document.getElementById('admin-upload-status');
     const password = document.getElementById('admin-password-input').value;
-    if (!password) { alert('Ingresa la clave de administrador antes de subir.'); return; }
+    if (!password) { showAlert('Ingresa la clave de administrador antes de subir.', 'warning'); return; }
 
     const nombreCurso = document.getElementById('builder-course-name').value.trim() || file.name.replace('.json', '');
 
     try {
-        statusEl.textContent = '⏳ Procesando...';
+        setAdminStatus(statusEl, 'Procesando...', 'loading');
         const token = await hashSHA256(password);
         const contenido = await file.text();
         const secciones = JSON.parse(contenido);
@@ -1672,20 +1721,20 @@ async function subirJsonOficial(event) {
         });
 
         if (respuesta.status === 401) {
-            statusEl.textContent = '❌ Acceso denegado: clave incorrecta.';
+            setAdminStatus(statusEl, 'Acceso denegado: clave incorrecta.', 'error');
             return;
         }
         if (!respuesta.ok) {
             const error = await respuesta.text();
-            statusEl.textContent = `❌ Error del servidor: ${error}`;
+            setAdminStatus(statusEl, `Error del servidor: ${error}`, 'error');
             return;
         }
 
         const resultado = await respuesta.json();
-        statusEl.textContent = `✅ Curso "${resultado.nombre}" subido correctamente (ID: ${resultado.id}).`;
+        setAdminStatus(statusEl, `Curso "${resultado.nombre}" subido correctamente (ID: ${resultado.id}).`, 'success');
         await cargarCursosServidor();
     } catch (err) {
-        statusEl.textContent = `❌ Error: ${err.message}`;
+        setAdminStatus(statusEl, `Error: ${err.message}`, 'error');
     } finally {
         event.target.value = '';
     }
