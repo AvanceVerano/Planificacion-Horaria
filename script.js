@@ -395,111 +395,280 @@ async function solicitarHorariosIndividualApi(cursosReq, sedesReq, bloqueosReq) 
     }
 }
 
+// Nuevas variables de estado para el modo interactivo
+let cursosPendientesInd = [];
+let horarioInteractivoActual = [];
+let bloqueosInteractivos = null;
+let sedesPermitidasInd = [];
+let cursoPreviewActual = null; // Curso que estamos visualizando en gris
+let seccionesPreview = [];     // Las secciones grises posibles
+
 async function iniciarGeneracionInd() {
-    const btn = document.getElementById('btn-generar');
     const errorMsg = document.getElementById('error-msg');
-    
-    const cursosReq = Array.from(document.querySelectorAll('.chk-curso:checked')).map(cb => cb.value);
-    const sedesReq = Array.from(document.querySelectorAll('.chk-sede:checked')).map(cb => cb.value);
-    const bloqueosInd = leerBloqueos('ind');
-    horariosInd = [];
+    cursosPendientesInd = Array.from(document.querySelectorAll('.chk-curso:checked')).map(cb => cb.value);
+    sedesPermitidasInd = Array.from(document.querySelectorAll('.chk-sede:checked')).map(cb => cb.value);
+    bloqueosInteractivos = leerBloqueos('ind');
+    horarioInteractivoActual = [];
+    cancelarPreview(); 
     errorMsg.innerText = '';
 
-    if (cursosReq.length === 0) {
+    if (cursosPendientesInd.length === 0) {
         errorMsg.innerText = 'Selecciona al menos un curso.';
         return;
     }
 
-    // LÍMITE DE SEGURIDAD PARA EVITAR CONGELAMIENTOS
-    if (cursosReq.length > 8) {
-        errorMsg.innerText = 'Por favor, selecciona un máximo de 8 cursos para evitar sobrecargar el navegador.';
-        return;
+    const timeLabels = document.getElementById('time-labels');
+    if (timeLabels.children.length === 0) {
+        for (let i = startHour; i <= endHour; i++) {
+            let div = document.createElement('div'); 
+            div.className = 'time-label';
+            div.style.top = `${((i - startHour) / (endHour - startHour)) * 100}%`;
+            div.textContent = `${i}:00`; 
+            timeLabels.appendChild(div);
+        }
     }
 
-    // ESTADO VISUAL DE CARGA
-    btn.innerText = 'Generando... ⏳';
-    btn.disabled = true;
+    isGroupMode = false;
+    document.getElementById('interactive-builder-tray').style.display = 'block';
+    document.getElementById('sub-tabs-container').style.display = 'none';
+    document.querySelector('.controls').style.display = 'none';
+    document.getElementById('calendar-title').innerText = `Armando Horario Individual`;
+    
+    actualizarBandejaInteractiva();
+    renderScheduleInteractivo();
+    cambiarPantalla('screen-calendar');
+}
+function actualizarBandejaInteractiva() {
+    const container = document.getElementById('tray-courses');
+    container.innerHTML = '';
 
-    try {
-        if (origenDatosInd === 'api' && catalogoDisponible) {
-            // Pasamos los bloqueos a la API
-            const horariosApi = await solicitarHorariosIndividualApi(cursosReq, sedesReq, bloqueosInd);
-            if (!horariosApi) return;
+    cursosPendientesInd.forEach(curso => {
+        const seccionAsignada = horarioInteractivoActual.find(s => s.curso === curso);
+        
+        if (seccionAsignada) {
+            container.innerHTML += `
+                <div style="background: #27ae60; color: white; padding: 8px 15px; border-radius: 20px; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                    ✅ ${curso} (${seccionAsignada.seccion})
+                    <button onclick="quitarSeccionInteractiva('${curso}')" style="background: none; border: none; color: white; cursor: pointer; font-weight: bold;">X</button>
+                </div>`;
+        } else {
+            // Si el curso es el que estamos previsualizando, lo pintamos oscuro
+            const isPreview = (curso === cursoPreviewActual);
+            const btnStyle = isPreview ? 'background-color: #34495e; color: white;' : '';
+            const btnText = isPreview ? `👀 Viendo ${curso}` : `➕ Asignar ${curso}`;
 
-            // El servidor ya filtró todo, solo asignamos los resultados
-            horariosInd = horariosApi;
+            container.innerHTML += `
+                <button class="btn-secondary" style="border-radius: 20px; ${btnStyle}" onclick="mostrarOpcionesSecciones('${curso}')">
+                    ${btnText}
+                </button>`;
+        }
+    });
+
+    const btnSave = document.getElementById('btn-save-interactive-fav');
+    if (horarioInteractivoActual.length === cursosPendientesInd.length && cursosPendientesInd.length > 0) {
+        btnSave.style.display = 'inline-block';
+    } else {
+        btnSave.style.display = 'none';
+    }
+}
+
+function mostrarOpcionesSecciones(curso) {
+    cursoPreviewActual = curso;
+    seccionesPreview = [];
+    let opcionesValidas = 0;
+
+    let seccionesPosibles = cursosDataInd[curso] || [];
+
+    seccionesPosibles.forEach(sec => {
+        if (!sedesPermitidasInd.includes(sec.sede)) return;
+        if (!seccionCumpleFiltros(sec, bloqueosInteractivos)) return;
+        
+        let cursosQueChocan = [];
+        horarioInteractivoActual.forEach(asignada => {
+            const choca = asignada.sesiones.some(s1 => sec.sesiones.some(s2 => hayColision(s1, s2)));
+            if (choca) {
+                cursosQueChocan.push(asignada.curso);
+            }
+        });
+
+        opcionesValidas++;
+        
+        // --- ¡EL FIX DEL UNDEFINED!: Ahora guardamos 'curso: curso' explícitamente ---
+        seccionesPreview.push({ 
+            ...sec, 
+            curso: curso, 
+            chocaCon: cursosQueChocan 
+        });
+    });
+
+    const instructions = document.getElementById('preview-instructions');
+    const text = document.getElementById('preview-text');
+
+    if (opcionesValidas === 0) {
+        instructions.style.display = 'block';
+        instructions.style.borderLeftColor = '#e74c3c';
+        instructions.style.backgroundColor = '#fdedec';
+        text.innerHTML = `<strong style="color:#c0392b;">${curso}:</strong> No hay opciones en las sedes o días permitidos.`;
+    } else {
+        instructions.style.display = 'block';
+        instructions.style.borderLeftColor = '#3498db';
+        instructions.style.backgroundColor = '#e8f4f8';
+        text.innerHTML = `Viendo <strong>${curso}</strong>. <span style="color: #7f8c8d;">Gris = Libre | <span style="color: #c0392b;">Rojo = Cruza (Clic para reemplazar)</span></span>`;
+    }
+
+    actualizarBandejaInteractiva();
+    renderScheduleInteractivo();
+}
+
+function cancelarPreview() {
+    cursoPreviewActual = null;
+    seccionesPreview = [];
+    document.getElementById('preview-instructions').style.display = 'none';
+    actualizarBandejaInteractiva();
+    renderScheduleInteractivo();
+}
+
+function elegirSeccionInteractiva(nombreCurso, codSeccion) {
+    const seccionData = cursosDataInd[nombreCurso].find(s => s.seccion === codSeccion);
+    horarioInteractivoActual.push({ ...seccionData, curso: nombreCurso });
+    cancelarPreview(); // Esto limpia el gris y consolida el color
+}
+
+function quitarSeccionInteractiva(nombreCurso) {
+    horarioInteractivoActual = horarioInteractivoActual.filter(s => s.curso !== nombreCurso);
+    cancelarPreview(); 
+}
+
+// NUEVO MOTOR DE RENDERIZADO: Previene que los bloques se tapen visualmente
+function renderScheduleInteractivo() {
+    document.querySelectorAll('.day-grid').forEach(g => g.innerHTML = '');
+
+    // 1. Agrupar todas las sesiones (asignadas + preview) por día
+    let sesionesPorDia = { 'Lun': [], 'Mar': [], 'Mie': [], 'Jue': [], 'Vie': [], 'Sab': [] };
+
+    // Agregar las que ya están fijas en tu horario
+    horarioInteractivoActual.forEach((curso, idx) => {
+        curso.sesiones.forEach(ses => {
+            if(sesionesPorDia[ses.dia]) {
+                sesionesPorDia[ses.dia].push({
+                    ...ses, cursoData: curso, colorHex: obtenerColorCurso(curso.curso),
+                    esPreview: false, zIndexBase: idx, tieneChoque: false
+                });
+            }
+        });
+    });
+
+    // Agregar las del preview (grises o rojas)
+    if (cursoPreviewActual && seccionesPreview.length > 0) {
+        seccionesPreview.forEach((sec, idx) => {
+            const tieneChoque = sec.chocaCon && sec.chocaCon.length > 0;
+            sec.sesiones.forEach(ses => {
+                if(sesionesPorDia[ses.dia]) {
+                    sesionesPorDia[ses.dia].push({
+                        ...ses, cursoData: sec, colorHex: tieneChoque ? '#fadbd8' : '#bdc3c7',
+                        esPreview: true, zIndexBase: 100 + idx, tieneChoque: tieneChoque
+                    });
+                }
+            });
+        });
+    }
+
+    // 2. Calcular superposiciones para dividirlas a lo ancho
+    Object.keys(sesionesPorDia).forEach(dia => {
+        let sesiones = sesionesPorDia[dia];
+        if (sesiones.length === 0) return;
+
+        // Ordenar temprano -> tarde
+        sesiones.sort((a, b) => parseTime(a.inicio) - parseTime(b.inicio));
+
+        let columnas = [];
+        sesiones.forEach(ses => {
+            let colocada = false;
+            for (let i = 0; i < columnas.length; i++) {
+                let ultimaEnColumna = columnas[i][columnas[i].length - 1];
+                // Si la sesión anterior termina antes o a la misma hora que empieza esta, comparten columna
+                if (parseTime(ultimaEnColumna.fin) <= parseTime(ses.inicio)) {
+                    columnas[i].push(ses);
+                    ses.columna = i;
+                    colocada = true;
+                    break;
+                }
+            }
+            if (!colocada) {
+                ses.columna = columnas.length;
+                columnas.push([ses]);
+            }
+        });
+
+        const totalColumnas = columnas.length;
+
+        // 3. Dibujar cada bloque con su nuevo ancho y posición horizontal
+        sesiones.forEach(ses => {
+            const anchoPorcentaje = 100 / totalColumnas;
+            const izquierdaPorcentaje = ses.columna * anchoPorcentaje;
+            dibujarBloqueUnicoInteligente(ses, dia, anchoPorcentaje, izquierdaPorcentaje);
+        });
+    });
+}
+
+function dibujarBloqueUnicoInteligente(ses, dia, width, left) {
+    const grid = document.getElementById(`grid-${dia}`);
+    if (!grid) return;
+
+    const { cursoData, colorHex, esPreview, tieneChoque, zIndexBase } = ses;
+    const topP = ((parseTime(ses.inicio) - startHour * 60) / totalMinutes) * 100;
+    const hP = ((parseTime(ses.fin) - parseTime(ses.inicio)) / totalMinutes) * 100;
+
+    const icon = cursoData.sede.toLowerCase().includes('virtual') ? '💻' : '🏫';
+    let borderStyle, hoverEffect, textoSedeHover;
+
+    if (esPreview) {
+        if (tieneChoque) {
+            borderStyle = 'border: 2px dashed #e74c3c; opacity: 0.95; cursor: pointer; transition: 0.2s;';
+            hoverEffect = `onmouseover="this.style.transform='scale(1.02)'; this.style.backgroundColor='#f5b7b1'; this.style.zIndex='999';" onmouseout="this.style.transform='scale(1)'; this.style.backgroundColor='${colorHex}'; this.style.zIndex='${zIndexBase}';"`;
+            textoSedeHover = `<div style="font-size: 10px; color: #c0392b; line-height: 1.1;">⚠️ Cruza con: <br>${cursoData.chocaCon.join(', ')}</div>`;
+        } else {
+            borderStyle = 'border: 2px dashed #7f8c8d; opacity: 0.95; cursor: pointer; transition: 0.2s;';
+            hoverEffect = `onmouseover="this.style.transform='scale(1.02)'; this.style.backgroundColor='#aab7b8'; this.style.zIndex='999';" onmouseout="this.style.transform='scale(1)'; this.style.backgroundColor='${colorHex}'; this.style.zIndex='${zIndexBase}';"`;
+            textoSedeHover = `<div style="font-size: 10px; color: #333;">👉 Clic para elegir</div>`;
+        }
+    } else {
+        borderStyle = 'border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 2px 4px rgba(0,0,0,0.1);';
+        hoverEffect = '';
+        textoSedeHover = `👨‍🏫 ${cursoData.profesor || 'Sin profesor'}`;
+    }
+
+    const clickAction = esPreview ? `onclick="elegirSeccionInteractiva('${cursoData.curso}', '${cursoData.seccion}')"` : '';
+
+    // Etiqueta destacada de Sede
+    const etiquetaSede = `
+        <div style="background: rgba(255,255,255,0.9); color: #2c3e50; padding: 2px 4px; border-radius: 4px; font-size: 10px; font-weight: bold; display: inline-block; margin-bottom: 2px; border: 1px solid #ccc;">
+            📍 <span style="text-transform: capitalize;">${cursoData.sede}</span>
+        </div>`;
+
+    grid.innerHTML += `
+        <div class="class-block"
+             style="top:${topP}%; height:${hP}%; width:calc(${width}% - 2px); left:${left}%; background-color:${colorHex}; z-index:${zIndexBase}; ${borderStyle} padding: 4px; overflow: hidden;"
+             ${hoverEffect} ${clickAction}>
             
-            if (horariosInd.length === 0) {
-                errorMsg.innerText = "No se encontró ninguna combinación posible.";
-                return;
-            }
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <span style="font-weight: bold; font-size: 11px; line-height: 1.1;">${cursoData.curso}</span>
+                <span title="${cursoData.sede}">${icon}</span>
+            </div>
+            
+            ${etiquetaSede}
+            
+            <div style="font-size: 11px; font-weight: bold; margin-bottom: 2px;">Sec: ${cursoData.seccion}</div>
+            <div style="font-size: 10px;">${ses.inicio} - ${ses.fin}</div>
+            <div style="margin-top: 4px; font-size: 11px;">${textoSedeHover}</div>
+            
+        </div>`;
+}
 
-            isGroupMode = false;
-            schedulesList = horariosInd;
-            prepararCalendario('Individuales', 'screen-setup');
-            cambiarPantalla('screen-calendar');
-            return;
-        }
-        
-        // --- BÚSQUEDA LOCAL con Bitmask (Si usas JSON directamente) ---
-
-        // 1. Pre-computar la máscara de bloqueos del usuario una sola vez: O(días × rangos).
-        const mascaraBloqueos = bloqueosToBitmasks(bloqueosInd);
-
-        // 2. Pre-computar la máscara de cada sección candidata y descartar las inválidas.
-        //    Se filtran por sede y por la máscara de bloqueos (Validación O(1)).
-        const seccionesPorCurso = {};
-        for (const curso of cursosReq) {
-            seccionesPorCurso[curso] = (cursosDataInd[curso] || [])
-                .filter(sec => sedesReq.includes(sec.sede))
-                .map(sec => ({ ...sec, curso, _mascaras: seccionToBitmasks(sec) }))
-                .filter(sw => !chocaConMascaras(sw._mascaras, mascaraBloqueos));
-        }
-
-        // 3. Acumulador de bits del horario en construcción: int[6], uno por día.
-        //    Se mantiene sincronizado con `actual` en todo momento.
-        const mascaraActual = [0, 0, 0, 0, 0, 0];
-        const actual = [];
-
-        // 4. DFS con Bitmasking: cada verificación de colisión es O(6) = O(1).
-        function buscar(idx) {
-            if (idx === cursosReq.length) { horariosInd.push([...actual]); return; }
-            const curso = cursosReq[idx];
-            for (const sw of (seccionesPorCurso[curso] || [])) {
-                // Validación 1 — ¿Choca con el horario ya armado? (Bitwise AND)
-                if (chocaConMascaras(sw._mascaras, mascaraActual)) continue;
-
-                // Push: Bitwise OR para agregar la sección al acumulador.
-                for (let d = 0; d < 6; d++) mascaraActual[d] |= sw._mascaras[d];
-                actual.push(sw);
-
-                buscar(idx + 1);
-
-                // Pop: Bitwise AND NOT para deshacer el OR al retroceder.
-                actual.pop();
-                for (let d = 0; d < 6; d++) mascaraActual[d] &= ~sw._mascaras[d];
-            }
-        }
-
-        // Respiro de 50ms para que el navegador dibuje el botón de "Generando..."
-        await new Promise(resolve => setTimeout(resolve, 50));
-        buscar(0);
-        
-        if (horariosInd.length === 0) {
-            errorMsg.innerText = "No se encontró ninguna combinación posible.";
-            return; 
-        }
-
-        isGroupMode = false;
-        schedulesList = horariosInd;
-        prepararCalendario('Individuales', 'screen-setup');
-        cambiarPantalla('screen-calendar');
-
-    } finally {
-        // RESTAURAMOS EL BOTÓN PASE LO QUE PASE
-        btn.innerText = 'Generar Horarios';
-        btn.disabled = false;
-    }
+function guardarHorarioInteractivoComoFav() {
+    favsInd.push([...horarioInteractivoActual]);
+    document.getElementById('fav-ind-status').innerText = `${favsInd.length} guardados`;
+    alert("¡Horario guardado en tus Favoritos! ⭐\nPuedes ir a la pestaña Favoritos para descargarlo.");
 }
 
 async function solicitarHorariosGrupalesApi(estudiantes, sedesPermitidas) {
