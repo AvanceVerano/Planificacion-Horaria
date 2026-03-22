@@ -52,12 +52,23 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// 3. AUTO-MIGRACIONES EN PRODUCCIÓN (¡Vital para Railway!)
+// 3. AUTO-CREACIÓN DE TABLAS EN PRODUCCIÓN Y LOCAL
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<HorariosProDbContext>();
-    // Esto crea las tablas en Postgres automáticamente si no existen
-    db.Database.Migrate(); 
+    var services = scope.ServiceProvider;
+    try 
+    {
+        var db = services.GetRequiredService<HorariosProDbContext>();
+        Console.WriteLine("Generando base de datos...");
+        
+        db.Database.EnsureCreated(); 
+        
+        Console.WriteLine("¡Base de datos lista!");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error en base de datos: {ex.Message}");
+    }
 }
 
 // Aplicar la política de CORS correcta
