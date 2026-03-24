@@ -63,6 +63,9 @@ let catalogoCursos = [];
 let origenDatosInd = 'ninguno';
 let origenDatosGrp = 'ninguno';
 const API_BASE_URL = 'https://planificacion-horaria-production.up.railway.app';
+window.API_BASE_URL = API_BASE_URL;
+const ADMIN_TOKEN_STORAGE_KEY = 'admin_token';
+window.ADMIN_TOKEN_STORAGE_KEY = ADMIN_TOKEN_STORAGE_KEY;
 const ADMIN_EMAIL = 'fabrizioprogramador939@gmail.com';
 
 // Estado del Calendario Actual
@@ -1260,7 +1263,7 @@ function actualizarSelectorCursosServidor() {
 async function cargarCursosServidor() {
     setBuilderStatus('Cargando cursos del servidor...');
     const password = document.getElementById('admin-password-input').value;
-    const token = password ? await hashSHA256(password) : "";
+    const token = password ? await hashSHA256(password) : (sessionStorage.getItem(ADMIN_TOKEN_STORAGE_KEY) || "");
 
     try {
         const response = await fetch(`${API_BASE_URL}/api/admin/cursos`, {
@@ -1663,6 +1666,7 @@ async function validarYMostrarPanelAdmin() {
         });
 
         if (respuesta.status === 401) {
+            sessionStorage.removeItem(ADMIN_TOKEN_STORAGE_KEY);
             setAdminStatus(statusEl, 'Clave incorrecta. Acceso denegado.', 'error');
             panelAdmin.style.display = 'none';
             return;
@@ -1677,6 +1681,7 @@ async function validarYMostrarPanelAdmin() {
         const data = await respuesta.json();
         builderCursosServidor = Array.isArray(data) ? data : [];
         actualizarSelectorCursosServidor();
+        sessionStorage.setItem(ADMIN_TOKEN_STORAGE_KEY, token);
 
         // Ocultamos el login y mostramos el panel secreto
         panelLogin.style.display = 'none';
