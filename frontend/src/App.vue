@@ -332,7 +332,7 @@ const statusStyle = computed(() => ({
   color: isError.value ? '#e74c3c' : '#27ae60'
 }))
 
-const apiBaseUrl = window.API_BASE_URL || window.location.origin
+const apiBaseUrl = window.API_BASE_URL || 'https://planificacion-horaria-production.up.railway.app'
 const tokenErrorMessage = '❌ Acceso denegado: Token inválido o expirado'
 
 const setStatus = (message, error = false) => {
@@ -359,13 +359,13 @@ const getFriendlyError = async (response) => {
       }
     } catch (error) {
       console.error('Error parsing error response JSON:', error)
-      return 'No se pudo subir el curso.'
+      return 'Error al procesar la respuesta del servidor.'
     }
-    return 'No se pudo subir el curso.'
+    return 'Error al procesar la respuesta del servidor.'
   }
   const trimmed = rawText.trim()
   if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
-    return 'No se pudo subir el curso.'
+    return 'Error al procesar la respuesta del servidor.'
   }
   return trimmed
 }
