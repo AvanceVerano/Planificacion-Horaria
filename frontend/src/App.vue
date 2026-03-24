@@ -333,7 +333,7 @@ const statusStyle = computed(() => ({
 }))
 
 const apiBaseUrl = window.API_BASE_URL || 'https://planificacion-horaria-production.up.railway.app'
-const tokenErrorMessage = '❌ Acceso denegado: Token inválido o expirado'
+const tokenErrorMessage = 'Acceso denegado: Token inválido o expirado'
 
 const setStatus = (message, error = false) => {
   statusMessage.value = message
@@ -395,13 +395,13 @@ const handleAdminJsonUpload = async (event) => {
   }
 
   try {
-    setStatus('⏳ Subiendo curso al servidor...')
+    setStatus('Subiendo curso al servidor...')
     const contenido = await file.text()
     const parsed = JSON.parse(contenido)
     const secciones = Array.isArray(parsed) ? parsed : parsed?.secciones
 
     if (!Array.isArray(secciones) || secciones.length === 0) {
-      setStatus('❌ El JSON no contiene secciones válidas.', true)
+      setStatus('El JSON no contiene secciones válidas.', true)
       return
     }
 
@@ -421,20 +421,20 @@ const handleAdminJsonUpload = async (event) => {
 
     if (!respuesta.ok) {
       const errorMessage = await getFriendlyError(respuesta)
-      setStatus(`❌ ${errorMessage}`, true)
+      setStatus(errorMessage, true)
       return
     }
 
     const resultado = await respuesta.json().catch(() => ({}))
     const nombreResultado = resultado?.nombre || nombre
-    setStatus(`✅ Curso "${nombreResultado}" subido correctamente.`)
+    setStatus(`Curso "${nombreResultado}" subido correctamente.`)
 
     if (typeof window.cargarCursosServidor === 'function') {
       await window.cargarCursosServidor()
     }
   } catch (error) {
     console.error('Error processing JSON file upload:', error)
-    setStatus('❌ No se pudo procesar el archivo JSON.', true)
+    setStatus('No se pudo procesar el archivo JSON.', true)
   } finally {
     input.value = ''
   }
