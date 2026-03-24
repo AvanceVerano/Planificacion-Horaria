@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-const STORAGE_KEY = 'admin_token'
+const STORAGE_KEY = window.ADMIN_TOKEN_STORAGE_KEY || 'admin_token'
 
 export const useAdminStore = defineStore('admin', {
   state: () => ({
