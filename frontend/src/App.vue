@@ -190,7 +190,7 @@
         <div style="display: flex; gap: 10px; align-items: flex-end;">
           <div class="input-group" style="flex: 2; margin: 0;">
             <label>Nombre del Curso (Público):</label>
-            <input type="text" id="builder-course-name" placeholder="Ej. Arquitectura de Software">
+            <input ref="builderCourseNameInput" type="text" id="builder-course-name" placeholder="Ej. Arquitectura de Software">
           </div>
           <div class="input-group" style="flex: 1; margin: 0;">
             <label>O cargar JSON para editar:</label>
@@ -237,8 +237,15 @@
         </h4>
 
         <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
-          <input ref="adminUploadInput" type="file" accept=".json" style="display:none;" @change="handleAdminJsonUpload">
-          <Button class="btn-secondary" style="flex: 1;" type="button" @click="triggerAdminUpload">
+          <input
+            ref="adminUploadInput"
+            id="admin-upload-input"
+            type="file"
+            accept=".json"
+            style="display:none;"
+            aria-label="Subir nuevo curso en formato JSON"
+            @change="handleAdminJsonUpload">
+          <Button class="btn-secondary" style="flex: 1;" type="button" aria-controls="admin-upload-input" @click="triggerAdminUpload">
             <template #icon>
               <IconUpload class="app-icon" />
             </template>
@@ -313,6 +320,7 @@ const adminStore = useAdminStore()
 adminStore.syncToken()
 
 const adminUploadInput = ref(null)
+const builderCourseNameInput = ref(null)
 const statusMessage = ref('')
 const isError = ref(false)
 
@@ -337,18 +345,23 @@ const triggerAdminUpload = () => {
 
 const getFriendlyError = async (response) => {
   const contentType = response.headers.get('content-type') || ''
-  if (contentType.includes('application/json')) {
-    const data = await response.json().catch(() => null)
-    const message = data?.message || data?.error || data?.title
-    return typeof message === 'string' && message.trim()
-      ? message
-      : 'No se pudo subir el curso.'
-  }
-  const text = await response.text()
-  if (!text) {
+  const rawText = await response.text()
+  if (!rawText) {
     return 'No se pudo subir el curso.'
   }
-  const trimmed = text.trim()
+  if (contentType.includes('application/json')) {
+    try {
+      const data = JSON.parse(rawText)
+      const message = data?.message || data?.error || data?.title
+      if (typeof message === 'string' && message.trim()) {
+        return message
+      }
+    } catch (error) {
+      return 'No se pudo subir el curso.'
+    }
+    return 'No se pudo subir el curso.'
+  }
+  const trimmed = rawText.trim()
   if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
     return 'No se pudo subir el curso.'
   }
@@ -372,7 +385,7 @@ const handleAdminJsonUpload = async (event) => {
   }
 
   const defaultName = file.name.replace(/\.json$/i, '')
-  const courseNameInput = document.getElementById('builder-course-name')
+  const courseNameInput = builderCourseNameInput.value
   const nombre = courseNameInput?.value.trim() || defaultName
 
   if (courseNameInput && !courseNameInput.value.trim()) {

@@ -8,15 +8,15 @@ export const useAdminStore = defineStore('admin', {
   }),
   actions: {
     syncToken() {
-      this.token = localStorage.getItem(STORAGE_KEY) || ''
+      this.token = sessionStorage.getItem(STORAGE_KEY) || ''
     },
     setToken(token) {
       this.token = token || ''
       if (this.token) {
-        localStorage.setItem(STORAGE_KEY, this.token)
+        sessionStorage.setItem(STORAGE_KEY, this.token)
         return
       }
-      localStorage.removeItem(STORAGE_KEY)
+      sessionStorage.removeItem(STORAGE_KEY)
     }
   }
 })
