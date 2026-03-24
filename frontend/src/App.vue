@@ -332,7 +332,7 @@ const statusStyle = computed(() => ({
   color: isError.value ? '#e74c3c' : '#27ae60'
 }))
 
-const apiBaseUrl = window.API_BASE_URL || ''
+const apiBaseUrl = window.API_BASE_URL || window.location.origin
 const tokenErrorMessage = '❌ Acceso denegado: Token inválido o expirado'
 
 const setStatus = (message, error = false) => {
@@ -358,7 +358,7 @@ const getFriendlyError = async (response) => {
         return message
       }
     } catch (error) {
-      console.error(error)
+      console.error('Error parsing error response JSON:', error)
       return 'No se pudo subir el curso.'
     }
     return 'No se pudo subir el curso.'
@@ -433,7 +433,7 @@ const handleAdminJsonUpload = async (event) => {
       await window.cargarCursosServidor()
     }
   } catch (error) {
-    console.error(error)
+    console.error('Error processing JSON file upload:', error)
     setStatus('❌ No se pudo procesar el archivo JSON.', true)
   } finally {
     input.value = ''
