@@ -236,6 +236,17 @@
           <IconSettings class="app-icon" style="color:var(--primary);" /> Panel de Control de Base de Datos
         </h4>
 
+        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+          <input ref="adminUploadInput" type="file" accept=".json" style="display:none;" @change="handleAdminJsonUpload">
+          <Button class="btn-secondary" style="flex: 1;" type="button" @click="triggerAdminUpload">
+            <template #icon>
+              <IconUpload class="app-icon" />
+            </template>
+            Subir Nuevo Curso (JSON)
+          </Button>
+        </div>
+        <div v-if="statusMessage" :style="statusStyle">{{ statusMessage }}</div>
+
         <div style="margin-bottom: 15px;">
           <label>Cursos en el servidor:</label>
           <select id="builder-course-select" style="width: 100%; padding: 10px; border-radius: var(--radius-sm); border: 1.5px solid var(--border);">
@@ -271,6 +282,9 @@
 </template>
 
 <script setup>
+import { computed, ref } from 'vue'
+import Button from 'primevue/button'
+import { useAdminStore } from './stores/admin'
 import IconGraduationCap from '~icons/lucide/graduation-cap'
 import IconUser          from '~icons/lucide/user'
 import IconUsers         from '~icons/lucide/users'
@@ -278,6 +292,7 @@ import IconPencil        from '~icons/lucide/pencil'
 import IconStar          from '~icons/lucide/star'
 import IconRefreshCw     from '~icons/lucide/refresh-cw'
 import IconUploadCloud   from '~icons/lucide/upload-cloud'
+import IconUpload        from '~icons/lucide/upload'
 import IconArrowLeft     from '~icons/lucide/arrow-left'
 import IconChevronLeft   from '~icons/lucide/chevron-left'
 import IconChevronRight  from '~icons/lucide/chevron-right'
@@ -293,6 +308,121 @@ import IconKey           from '~icons/lucide/key'
 import IconSettings      from '~icons/lucide/settings'
 import IconSave          from '~icons/lucide/save'
 import IconTrash2        from '~icons/lucide/trash-2'
+
+const adminStore = useAdminStore()
+adminStore.syncToken()
+
+const adminUploadInput = ref(null)
+const statusMessage = ref('')
+const isError = ref(false)
+
+const statusStyle = computed(() => ({
+  marginBottom: '15px',
+  fontWeight: '700',
+  fontSize: '13px',
+  fontFamily: "'Public Sans', sans-serif",
+  color: isError.value ? '#e74c3c' : '#27ae60'
+}))
+
+const apiBaseUrl = window.API_BASE_URL || 'https://planificacion-horaria-production.up.railway.app'
+
+const setStatus = (message, error = false) => {
+  statusMessage.value = message
+  isError.value = error
+}
+
+const triggerAdminUpload = () => {
+  adminUploadInput.value?.click()
+}
+
+const getFriendlyError = async (response) => {
+  const contentType = response.headers.get('content-type') || ''
+  if (contentType.includes('application/json')) {
+    const data = await response.json().catch(() => null)
+    const message = data?.message || data?.error || data?.title
+    return typeof message === 'string' && message.trim()
+      ? message
+      : 'No se pudo subir el curso.'
+  }
+  const text = await response.text()
+  if (!text) {
+    return 'No se pudo subir el curso.'
+  }
+  const trimmed = text.trim()
+  if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+    return 'No se pudo subir el curso.'
+  }
+  return trimmed
+}
+
+const handleAdminJsonUpload = async (event) => {
+  const input = event.target
+  const file = input?.files?.[0]
+  if (!file) {
+    return
+  }
+
+  adminStore.syncToken()
+  const token = adminStore.token
+
+  if (!token) {
+    setStatus('❌ Acceso denegado: Token inválido o expirado', true)
+    input.value = ''
+    return
+  }
+
+  const defaultName = file.name.replace(/\.json$/i, '')
+  const courseNameInput = document.getElementById('builder-course-name')
+  const nombre = courseNameInput?.value.trim() || defaultName
+
+  if (courseNameInput && !courseNameInput.value.trim()) {
+    courseNameInput.value = defaultName
+  }
+
+  try {
+    setStatus('⏳ Subiendo curso al servidor...')
+    const contenido = await file.text()
+    const parsed = JSON.parse(contenido)
+    const secciones = Array.isArray(parsed) ? parsed : parsed?.secciones
+
+    if (!Array.isArray(secciones) || secciones.length === 0) {
+      setStatus('❌ El JSON no contiene secciones válidas.', true)
+      return
+    }
+
+    const respuesta = await fetch(`${apiBaseUrl}/api/admin/cursos/upload-json`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Admin-Token': token
+      },
+      body: JSON.stringify({ nombre, secciones })
+    })
+
+    if (respuesta.status === 401) {
+      setStatus('❌ Acceso denegado: Token inválido o expirado', true)
+      return
+    }
+
+    if (!respuesta.ok) {
+      const errorMessage = await getFriendlyError(respuesta)
+      setStatus(`❌ ${errorMessage}`, true)
+      return
+    }
+
+    const resultado = await respuesta.json().catch(() => ({}))
+    const nombreResultado = resultado?.nombre || nombre
+    setStatus(`✅ Curso "${nombreResultado}" subido correctamente.`)
+
+    if (typeof window.cargarCursosServidor === 'function') {
+      await window.cargarCursosServidor()
+    }
+  } catch (error) {
+    setStatus('❌ No se pudo procesar el archivo JSON.', true)
+  } finally {
+    input.value = ''
+  }
+}
 </script>
 
 <style>
