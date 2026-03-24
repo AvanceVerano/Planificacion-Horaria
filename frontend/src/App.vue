@@ -332,7 +332,8 @@ const statusStyle = computed(() => ({
   color: isError.value ? '#e74c3c' : '#27ae60'
 }))
 
-const apiBaseUrl = window.API_BASE_URL || 'https://planificacion-horaria-production.up.railway.app'
+const apiBaseUrl = window.API_BASE_URL || ''
+const tokenErrorMessage = '❌ Acceso denegado: Token inválido o expirado'
 
 const setStatus = (message, error = false) => {
   statusMessage.value = message
@@ -357,6 +358,7 @@ const getFriendlyError = async (response) => {
         return message
       }
     } catch (error) {
+      console.error(error)
       return 'No se pudo subir el curso.'
     }
     return 'No se pudo subir el curso.'
@@ -379,7 +381,7 @@ const handleAdminJsonUpload = async (event) => {
   const token = adminStore.token
 
   if (!token) {
-    setStatus('❌ Acceso denegado: Token inválido o expirado', true)
+    setStatus(tokenErrorMessage, true)
     input.value = ''
     return
   }
@@ -413,7 +415,7 @@ const handleAdminJsonUpload = async (event) => {
     })
 
     if (respuesta.status === 401) {
-      setStatus('❌ Acceso denegado: Token inválido o expirado', true)
+      setStatus(tokenErrorMessage, true)
       return
     }
 
@@ -431,6 +433,7 @@ const handleAdminJsonUpload = async (event) => {
       await window.cargarCursosServidor()
     }
   } catch (error) {
+    console.error(error)
     setStatus('❌ No se pudo procesar el archivo JSON.', true)
   } finally {
     input.value = ''
